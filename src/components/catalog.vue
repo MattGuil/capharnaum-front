@@ -2,13 +2,16 @@
     <div>
         <span class="knob" @click="$emit('toggle-catalog')"></span>
         <div class="activity-cards-container">
-            <activityCard v-for="activity in activities" :key="activity.id" :activity="activity" />
+            <activityCard 
+                v-for="activity in activities" 
+                :key="activity.id" 
+                :activity="activity" 
+            />
         </div>
     </div>
 </template>
 
 <script>
-import { ref } from 'vue';
 import activityCard from './activityCard.vue';
 
 export default {
@@ -21,9 +24,6 @@ export default {
             type: Array,
             required: true
         }
-    },
-    setup(props) {
-        console.log(props.activities);
     }
 }
 </script>

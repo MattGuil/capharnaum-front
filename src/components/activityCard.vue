@@ -1,5 +1,5 @@
 <template>
-    <v-card @click="clickCard">
+    <v-card @click="clickCard" :style="{ backgroundColor: activity.color }">
         <img :src="srcImage" alt="">
         <h1>{{ activity.title }}</h1>
         <h2>{{ activity.place }}</h2>
@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 
 export default {
     name: 'activityCard',
@@ -17,20 +17,28 @@ export default {
         }
     },
     setup(props) {
-        let srcImage = ref('');
+        const srcImage = ref('');
         
         const loadImage = () => {
-            let srcImage;
+            let imageSrc = '';
             try {
-                srcImage = new URL(`../assets/${props.activity.discipline.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}.jpg`, import.meta.url).href;
+                imageSrc = new URL(`../assets/${props.activity.discipline.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}.jpg`, import.meta.url).href;
             } catch (error) {
                 console.error('Image not found:', error);
             }
-            return srcImage;
+            return imageSrc;
         }
 
-        srcImage = loadImage();
-        return { activity: props.activity, srcImage };
+        onMounted(() => {
+            srcImage.value = loadImage();
+        });
+
+        
+        watch(() => props.activity, () => {
+            srcImage.value = loadImage();
+        });
+        
+        return { srcImage };
     },
     methods: {
         clickCard() {

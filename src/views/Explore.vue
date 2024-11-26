@@ -1,7 +1,7 @@
 <template>
     <div id="explore-container">
         <maptiler 
-            :activities="activities"
+            :activities="filteredActivities"
             id="map"
             @toggle-catalog="clickOnMap"
         />
@@ -9,12 +9,12 @@
             <div class="search-bar">
                 <v-icon class="filter-icon">mdi-tune</v-icon>
                 <input type="text" placeholder="Recherche..." class="search-input" v-model="searchVal" />
-                <v-icon class="search-icon">mdi-magnify</v-icon>
+                <v-icon class="search-icon" @click="filterActivities">mdi-magnify</v-icon>
             </div>
         </div>
         <catalog 
             :class="{ shown: showCatalog, hidden: !showCatalog }" 
-            :activities="activities"
+            :activities="filteredActivities"
             id="catalog" 
             @toggle-catalog="clickOnKnob"    
         />
@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import maptiler from '../components/map.vue';
 import catalog from '../components/catalog.vue';
 import axios from 'axios';
@@ -36,11 +36,13 @@ export default {
     setup() {
         let searchVal = ref('');
         const activities = ref(null);
+        const filteredActivities = ref(null);
         const showCatalog = ref(false);
 
-        watch(searchVal, (newVal) => {
-            console.log('searchVal a changé :', newVal);
-        });
+        const generateRandomColor = () => {
+            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+            return randomColor;
+        }
 
         onMounted(async () => {
             try {
@@ -48,6 +50,12 @@ export default {
                 
                 if (response.status === 200) {
                     activities.value = response.data;
+
+                    activities.value.forEach(activity => {
+                        activity.color = generateRandomColor();
+                    })
+
+                    filteredActivities.value = activities.value;
                     console.log(activities);
                 } else {
                     console.log("Erreur lors de la récupération des activités");
@@ -57,15 +65,23 @@ export default {
             }
         });
 
-        return { searchVal, activities, showCatalog };
+        const filterActivities = () => {
+            if (!searchVal.value) {
+                filteredActivities.value = activities.value;
+            } else {
+                filteredActivities.value = activities.value.filter(activity =>
+                    activity.title.toLowerCase().includes(searchVal.value.toLowerCase())
+                );
+            }
+        };
+
+        return { searchVal, activities, showCatalog, filteredActivities, filterActivities };
     },
     methods: {
         clickOnKnob() {
-            console.log("KNOB CLICKED");
             this.showCatalog = !this.showCatalog;
         },
         clickOnMap() {
-            console.log("MAP CLICKED");
             if (this.showCatalog) this.showCatalog = false;
         }
     }
