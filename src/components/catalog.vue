@@ -1,6 +1,6 @@
 <template>
     <div>
-        <SearchInput v-model="searchVal" />
+        <span class="knob" @click="$emit('toggle-catalog')"></span>
         <div class="activity-cards-container">
             <activityCard v-for="activity in activities" :key="activity.id" :activity="activity" />
         </div>
@@ -9,14 +9,11 @@
 
 <script>
 import { ref } from 'vue';
-import SearchInput from 'vue-search-input';
-import 'vue-search-input/dist/styles.css';
 import activityCard from './activityCard.vue';
 
 export default {
     name: 'catalog',
     components: {
-        SearchInput,
         activityCard
     },
     props: {
@@ -27,18 +24,19 @@ export default {
     },
     setup(props) {
         console.log(props.activities);
-        let searchVal = ref('');
-        return { searchVal };
     }
-};
+}
 </script>
 
 <style scoped>
 
-.search-input-wrapper {
-    width: 90%;
-    margin: auto;
-    margin-top: 20px;
+.knob {
+    position: relative;
+    z-index: 10;
+    margin: 10px 0 20px 0;
+    border: 3px solid gray;
+    border-radius: 10px;
+    width: 60px;
 }
 
 .activity-cards-container {

@@ -1,6 +1,6 @@
 <template>
     <div class="map-wrap">
-        <div class="map" ref="mapContainer"></div>
+        <div class="map" ref="mapContainer" @click="$emit('toggle-catalog')"></div>
     </div>
 </template>
 

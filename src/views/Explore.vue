@@ -3,18 +3,26 @@
         <maptiler 
             :activities="activities"
             id="map"
+            @toggle-catalog="clickOnMap"
         />
+        <div class="search-bar-container">
+            <div class="search-bar">
+                <v-icon class="filter-icon">mdi-tune</v-icon>
+                <input type="text" placeholder="Recherche..." class="search-input" v-model="searchVal" />
+                <v-icon class="search-icon">mdi-magnify</v-icon>
+            </div>
+        </div>
         <catalog 
             :class="{ shown: showCatalog, hidden: !showCatalog }" 
             :activities="activities"
             id="catalog" 
-            @click="toggleCatalog"    
+            @toggle-catalog="clickOnKnob"    
         />
     </div>
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import maptiler from '../components/map.vue';
 import catalog from '../components/catalog.vue';
 import axios from 'axios';
@@ -26,24 +34,15 @@ export default {
         catalog
     },
     setup() {
+        let searchVal = ref('');
         const activities = ref(null);
-        const showCatalog = ref(true);
+        const showCatalog = ref(false);
 
-        const toggleCatalog = (event) => {
-            event.stopPropagation();
-            showCatalog.value = !showCatalog.value;
-        };
-
-        const handleClickOutside = (event) => {
-            const catalogElement = document.getElementById('catalog');
-            if (catalogElement && !catalogElement.contains(event.target)) {
-                showCatalog.value = false;
-            }
-        };
+        watch(searchVal, (newVal) => {
+            console.log('searchVal a changé :', newVal);
+        });
 
         onMounted(async () => {
-            document.addEventListener('click', handleClickOutside);
-
             try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity`);
                 
@@ -58,11 +57,17 @@ export default {
             }
         });
 
-        onBeforeUnmount(() => {
-            document.removeEventListener('click', handleClickOutside);
-        });
-
-        return { activities, showCatalog, toggleCatalog };
+        return { searchVal, activities, showCatalog };
+    },
+    methods: {
+        clickOnKnob() {
+            console.log("KNOB CLICKED");
+            this.showCatalog = !this.showCatalog;
+        },
+        clickOnMap() {
+            console.log("MAP CLICKED");
+            if (this.showCatalog) this.showCatalog = false;
+        }
     }
 };
 </script>
@@ -74,12 +79,50 @@ export default {
     position: relative;
 }
 
+.search-bar-container {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-bar {
+    width: 90%;
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, .8);
+    border-radius: 20px;
+    padding: 8px;
+    max-width: 400px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.search-input {
+    flex-grow: 1;
+    padding: 5px 10px;
+    margin: 0 10px;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.search-input:focus {
+    outline: none;
+}
+
 #catalog {
     width: 100%;
     position: absolute;
     border-radius: 10px;
-    background-color: rgba(255, 255, 255, .75);
+    background-color: rgba(255, 255, 255, .8);
     transition: all .5s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #catalog.shown {
@@ -89,8 +132,8 @@ export default {
 }
 
 #catalog.hidden {
-    top: 89%;
-    height: 11%;
+    top: 88vh;
+    height: 12vh;
 }
 
 </style>
