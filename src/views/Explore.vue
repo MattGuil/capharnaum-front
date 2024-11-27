@@ -76,6 +76,10 @@ export default {
             }
         };
 
+        watch(searchVal, () => {
+            if (!searchVal.value) filterActivities();
+        });
+
         return { searchVal, activities, showCatalog, filteredActivities, filterActivities };
     },
     methods: {
@@ -138,12 +142,12 @@ export default {
     position: absolute;
     bottom: 0;
     width: 100%;
-    border-radius: 10px 10px 0 0;
-    background-color: rgba(255, 255, 255, .8);
-    transition: all .5s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
+    border-radius: 10px 10px 0 0;
+    background-color: rgba(255, 255, 255, .8);
+    transition: all .5s ease;
 }
 
 #catalog.shown {

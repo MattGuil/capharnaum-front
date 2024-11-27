@@ -52,6 +52,7 @@ export default {
 
 .v-card {
     margin: 0;
+    height: fit-content;
     padding: 10px;
     background-color: white;
     border-radius: 10px;
