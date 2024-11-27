@@ -21,8 +21,8 @@ button {
 }
 
 .v-main {
-  background-color: white;
-  /* background: linear-gradient(#60a6a0, #3c4798, #2b2d6c, #b94247); */
+  background: linear-gradient(#60a6a0, #3c4798, #2b2d6c, #b94247);
+  height: 100vh;
 }
 
 .v-container {

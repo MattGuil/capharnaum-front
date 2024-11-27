@@ -4,6 +4,7 @@
             :activities="filteredActivities"
             id="map"
             @toggle-catalog="clickOnMap"
+            @activity-selected="previewActivity"
         />
         <div class="search-bar-container">
             <div class="search-bar">
@@ -83,6 +84,9 @@ export default {
         },
         clickOnMap() {
             if (this.showCatalog) this.showCatalog = false;
+        },
+        previewActivity(activity) {
+            console.log(activity.title);
         }
     }
 };
@@ -149,6 +153,7 @@ export default {
 
 #catalog.hidden {
     height: 35px;
+    overflow-y: hidden;
 }
 
 </style>

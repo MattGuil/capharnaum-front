@@ -18,18 +18,22 @@ export default {
             required: true
         }
     },
-    setup(props) {
+    setup(props, { emit }) {
         const mapContainer = ref(null);
         const map = ref(null);
         const markers = ref([]);
 
-        const clickOnMarkerWithCoord = (coord) => {
-            map.value.setCenter([coord[0], coord[1]]);
-            map.value.setZoom(map.value.getZoom());
+        const clickOnMarker = (coord, activity) => {
+            map.value.flyTo({
+                center: ([coord[0], coord[1] - .025]),
+                duration: 1000,
+                essential: true
+            });
+            emit('activity-selected', activity);
         };
 
-        const addMarker = (coord, color) => {
-            const marker = new Marker({ color: color })
+        const addMarker = (coord, activity) => {
+            const marker = new Marker({ color: activity.color })
                 .setLngLat([coord[0], coord[1]])
                 .addTo(map.value);
 
@@ -48,7 +52,7 @@ export default {
 
                 if (coordString) {
                     const coordArray = coordString.split(',').map(Number);
-                    clickOnMarkerWithCoord(coordArray);
+                    clickOnMarker(coordArray, activity);
                 }
             });
 
@@ -68,7 +72,7 @@ export default {
                             const coord = result.features[0]?.center;
                             // console.log(coord);
                             if (coord && coord.length === 2) {
-                                addMarker(coord, activity.color);
+                                addMarker(coord, activity);
                             }
                         } catch (error) {
                             console.error('Erreur de géocodage :', error);
