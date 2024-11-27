@@ -1,6 +1,8 @@
 <template>
     <div>
-        <span class="knob" @click="$emit('toggle-catalog')"></span>
+        <span class="knob" @click="$emit('toggle-catalog')">
+            <p>_</p>
+        </span>
         <div class="activity-cards-container">
             <activityCard 
                 v-for="activity in activities" 
@@ -33,10 +35,15 @@ export default {
 .knob {
     position: relative;
     z-index: 10;
-    margin: 10px 0 20px 0;
-    border: 3px solid gray;
-    border-radius: 10px;
     width: 60px;
+    height: 5px;
+    background-color: lightgray;
+    margin: 10px 0 20px 0;
+    border-radius: 10px;
+}
+
+.knob p {
+    color: transparent;
 }
 
 .activity-cards-container {

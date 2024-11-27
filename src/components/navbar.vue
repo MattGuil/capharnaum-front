@@ -1,7 +1,7 @@
 <template>
     <v-bottom-navigation class="elevation-0">
         <v-btn value="explore" @click="navigateToExplore">
-            <v-icon size="30" color="#3c4798">mdi-magnify</v-icon>
+            <v-icon size="30" color="#3c4798">mdi-map</v-icon>
         </v-btn>
         <v-btn value="create" @click="navigateToCreate">
             <v-icon size="30" color="#3c4798">mdi-plus</v-icon>

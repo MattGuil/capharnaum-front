@@ -131,9 +131,10 @@ export default {
 }
 
 #catalog {
-    width: 100%;
     position: absolute;
-    border-radius: 10px;
+    bottom: 0;
+    width: 100%;
+    border-radius: 10px 10px 0 0;
     background-color: rgba(255, 255, 255, .8);
     transition: all .5s ease;
     display: flex;
@@ -142,14 +143,12 @@ export default {
 }
 
 #catalog.shown {
-    top: 50%;
     height: 50%;
     overflow-y: auto;
 }
 
 #catalog.hidden {
-    top: 88vh;
-    height: 12vh;
+    height: 35px;
 }
 
 </style>
