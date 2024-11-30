@@ -35,7 +35,7 @@ export default {
 <style scoped>
 
 .knob-container {
-    z-index: 10;
+    z-index: 100;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -46,6 +46,7 @@ export default {
 }
 
 .knob {
+    z-index: 1000;
     width: 60px;
     height: 5px;
     background-color: gray;
