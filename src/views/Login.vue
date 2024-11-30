@@ -40,7 +40,7 @@
 
 <script>
 import axios from 'axios';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
@@ -51,6 +51,12 @@ export default {
         const errorMessage = ref('');
         const router = useRouter();
 
+        onMounted(() => {
+            console.log(document.cookie);
+        })
+
+        axios.defaults.withCredentials = true;
+
         const login = () => {
             axios.post(`${import.meta.env.APP_API_URL}/user/login`, {
                 email: email.value,
@@ -58,8 +64,7 @@ export default {
             })
             .then((response) => {
                 if (response.status === 200) {
-                    localStorage.setItem('token', response.data.token);
-                    localStorage.setItem('user', response.data.user);
+                    localStorage.setItem('userId', response.data.userId);
                     router.push('/explore');
                 } else if (response.status === 201) {
                     errorMessage.value = response.data;
@@ -86,6 +91,11 @@ export default {
 </script>
 
 <style scoped>
+
+.v-container {
+    background: rgba(255, 255, 255, .8) !important;
+}
+
 img {
     width: 50px;
     height: fit-content;

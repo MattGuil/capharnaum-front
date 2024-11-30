@@ -1,73 +1,71 @@
 <template>
-
-    <div class="search-bar">
-        <v-icon class="filter-icon">mdi-tune</v-icon>
-        <input type="text" placeholder="Recherche..." class="search-input" />
-        <v-icon class="search-icon">mdi-magnify</v-icon>
-     </div>
-
     <div class="profile-card">
-        <h1>Profil</h1>
-        
-        <div class="profile-header">
-            <div class="profile-image">
-                <img src="https://via.placeholder.com/100" alt="Photo de profil">
-                <span class="rating">4.5</span>
+        <div>
+            <div class="profile-header">
+                <div class="profile-image">
+                    <img src="../assets/user.png" alt="Photo de profil">
+                    <span class="rating">4.5</span>
+                </div>
+                <h3>{{ prenom + " " + nom }}</h3>
+                <p class="bio">{{ bio }}</p>
             </div>
-            <h3>{{ userName }}</h3>
-            <p class="bio">{{ bio }}</p>
-            
-            <div class="action-buttons">
-                <v-btn @click="toggleFollow" class="follow-btn">
-                    {{ isFollowed ? 'Following' : 'Follow' }}
-                </v-btn>
+            <div class="contacts">
+                <v-icon color="blue-darken-2" icon="mdi-message-text-outline" size="24"></v-icon>
+                <!--
+                <div class="action-buttons">
+                    <v-btn @click="toggleFollow" class="follow-btn">
+                        {{ isFollowed ? 'Following' : 'Follow' }}
+                    </v-btn>
+                </div>
+                -->
+                <v-icon color="blue-darken-2" icon="mdi-share-variant" size="24"></v-icon>
             </div>
         </div>
-
-        <!-- Updated Stats Section with Icons Above Labels -->
         <div class="stats">
             <div class="stat-item">
-                <v-icon color="blue-darken-2" icon="mdi-message-text-outline" size="24"></v-icon>
-                <h4>{{ events }}</h4>
-                <p>Événements</p>
+                <h4>{{ activities }}</h4>
+                <p>Activités</p>
             </div>
             <div class="stat-item">
                 <h4>{{ followers }}</h4>
                 <p>Followers</p>
             </div>
             <div class="stat-item">
-                <v-icon color="blue-darken-2" icon="mdi-share-variant" size="24"></v-icon>
                 <h4>{{ following }}</h4>
                 <p>Following</p>
             </div>
         </div>
-
         <div class="interests">
             <h4>Centres d’intérêt</h4>
             <div class="interest-cards">
                 <div v-for="interest in interests" :key="interest" class="interest-card"></div>
             </div>
         </div>
-        
         <div class="buttons">
             <button class="profile-button">Mes favoris</button>
             <button class="profile-button">Mes activités</button>
         </div>
-
-       
     </div>
 </template>
 
 <script>
+import { onMounted } from 'vue';
+
 export default {
     name: 'Profile',
-    data() {
+    setup() {
+
+        onMounted(() => {
+            console.log(localStorage.getItem('userId'));
+        })
+
         return {
-            userName: "Ben Jabeur Jawher",
-            bio: "My bio goes here...",
-            followers: "XXXX",
-            following: "XXXX",
-            events: "XXX",
+            nom: "Ben Jabeur",
+            prenom: "Jawher",
+            bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            activities: 0,
+            followers: 0,
+            following: 0,
             isFollowed: false,
             interests: [1, 2, 3]
         };
@@ -83,14 +81,18 @@ export default {
 <style scoped>
 .profile-card {
     width: 100%;
-    max-width: 400px;
-    background: linear-gradient(to bottom, #e5efff, #f2e3ff);
-    border-radius: 20px;
+    height: 80vh;
     padding: 20px;
+    padding-top: 40px;
+    background: rgba(255, 255, 255, .8);
+    border-radius: 20px 20px 0 0;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
     text-align: center;
-    font-family: Arial, sans-serif;
-    margin: 0 auto;
+    position: absolute;
+    bottom: 8vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .profile-header {
@@ -99,12 +101,14 @@ export default {
 }
 
 .profile-image {
-    position: relative;
+    position: fixed;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
     margin: 0 auto;
     width: 80px;
     height: 80px;
-    border-radius: 50%;
-    overflow: hidden;
+    border-radius: 75%;
     border: 2px solid white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -118,8 +122,11 @@ export default {
     position: absolute;
     top: 0;
     right: 0;
+    z-index: 10;
     background: #4caf50;
     color: #fff;
+    height: 28px;
+    width: 28px;
     border-radius: 50%;
     padding: 5px;
     font-size: 12px;
@@ -135,6 +142,12 @@ h1, h3 {
     color: #e57373;
     font-size: 14px;
     margin: 5px 0 15px;
+}
+
+.contacts {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .action-buttons {
@@ -156,7 +169,6 @@ h1, h3 {
 .stats {
     display: flex;
     justify-content: space-around;
-    margin-top: 15px;
 }
 
 .stat-item {

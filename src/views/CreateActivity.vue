@@ -117,6 +117,10 @@ export default {
 </script>
 
 <style scoped>
+.v-container {
+    background: rgba(255, 255, 255, .8) !important;
+}
+
 h2 {
     margin-bottom: 25px;
 }

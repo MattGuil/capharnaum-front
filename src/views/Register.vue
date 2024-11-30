@@ -98,6 +98,11 @@ export default {
     </script>
 
 <style scoped>
+
+.v-container {
+    background: rgba(255, 255, 255, .8) !important;
+}
+
 img {
     width: 50px;
     height: fit-content;

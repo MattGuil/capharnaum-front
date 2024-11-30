@@ -15,6 +15,8 @@ import Participate from '../views/Participate.vue';
 import CreateActivity from '../views/CreateActivity.vue';
 import CreateProposal from '../views/CreateProposal.vue';
 
+import axios from 'axios';
+
 const routes = [
   {
     path: "/",
@@ -115,14 +117,18 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    const isAuthenticated = localStorage.getItem('token');
-
-    if (!isAuthenticated) {
+    try {
+      const response = await axios.get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true });
+      if (response.status === 200 && response.data.authenticated) {
+        next();
+      } else {
+        next({ name: 'Login' });
+      }
+    } catch (error) {
+      console.error('Erreur de vérification d\'authentification', error);
       next({ name: 'Login' });
-    } else {
-      next();
     }
   } else {
     next();
