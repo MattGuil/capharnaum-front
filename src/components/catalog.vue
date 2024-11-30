@@ -48,7 +48,7 @@ export default {
 .knob {
     width: 60px;
     height: 5px;
-    background-color: lightgray;
+    background-color: gray;
     border-radius: 10px;
     cursor: pointer;
 }
