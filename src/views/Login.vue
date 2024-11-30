@@ -67,10 +67,12 @@ export default {
                     localStorage.setItem('userId', response.data.userId);
                     router.push('/explore');
                 } else if (response.status === 201) {
+                    alert(response.data);
                     errorMessage.value = response.data;
                 }
             })
             .catch((error) => {
+                alert(`Erreur de connexion : ${error.response?.data || "Erreur lors de la connexion."}`);
                 errorMessage.value = error.response?.data || "Erreur lors de la connexion.";
             });
         };

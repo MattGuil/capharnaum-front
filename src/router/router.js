@@ -78,7 +78,7 @@ const routes = [
     path: '/explore',
     name: 'Explore',
     component: Explore,
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: true },
   },
   {
     path: '/activity/:id',
