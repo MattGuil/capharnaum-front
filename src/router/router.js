@@ -119,9 +119,8 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    let response;
     try {
-      response = await axios.get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true });
+      const response = await axios.get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true });
       if (response.status === 200 && response.data.authenticated) {
         next();
       } else {
@@ -129,7 +128,7 @@ router.beforeEach(async (to, from, next) => {
       }
     } catch (error) {
       console.error('Erreur de vérification d\'authentification', error);
-      next({ name: 'Login', query: { error: response.data.cookies } });
+      next({ name: 'Login', query: { error: error.toString() } });
     }
   } else {
     next();
