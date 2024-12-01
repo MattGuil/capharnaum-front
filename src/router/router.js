@@ -122,6 +122,7 @@ router.beforeEach(async (to, from, next) => {
     try {
       const response = await axios.get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true });
       if (response.status === 200 && response.data.authenticated) {
+        console.log(response);
         next();
       } else {
         next({ name: 'Login', query: { error: 'Non authentifié. Veuillez vous reconnecter.' } });

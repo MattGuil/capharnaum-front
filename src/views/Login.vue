@@ -30,8 +30,8 @@
                 <p v-if="$route.query.error" class="text-danger" style="margin-top: 10px; text-align: center;">
                     {{ $route.query.error }}
                 </p>
-                <p v-if="cookies" class="text-info" style="margin-top: 10px; text-align: center;">
-                    {{ cookies }}
+                <p v-if="debug" class="text-info" style="margin-top: 10px; text-align: center;">
+                    {{ debug }}
                 </p>
             </v-card-text>
             <v-card-actions class="d-flex justify-center">
@@ -52,36 +52,39 @@ import { useRouter } from 'vue-router';
 export default {
     name: 'Login',
     setup() {
+
         const email = ref('');
         const password = ref('');
         const errorMessage = ref('');
         const router = useRouter();
+        const debug = ref('');
 
         axios.defaults.withCredentials = true;
 
-        const cookies = ref('');
-
-        onMounted(() => {
-            cookies.value = document.cookie;
-        })
-
-        const login = () => {
-            axios
-                .post(`${import.meta.env.APP_API_URL}/user/login`, {
+        const login = async () => {
+            try {
+                const response = await axios.post(`${import.meta.env.APP_API_URL}/user/login`, {
                     email: email.value,
                     password: password.value
-                })
-                .then((response) => {
-                    if (response.status === 200) {
-                        localStorage.setItem('userId', response.data.userId);
-                        // router.push('/explore');
-                    } else if (response.status === 201) {
-                        errorMessage.value = response.data;
-                    }
-                })
-                .catch((error) => {
-                    errorMessage.value = error.response?.data || "Erreur lors de la connexion.";
                 });
+
+                if (response.status === 200) {
+                    localStorage.setItem('userId', response.data.userId);
+
+                    const sessionResponse = await axios.get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true });
+                    
+                    if (sessionResponse.status === 200 && sessionResponse.data.authenticated) {
+                        debug.value += sessionResponse.status + " ";
+                        // router.push('/explore');
+                    } else {
+                        errorMessage.value = 'Non authentifié. Veuillez vous reconnecter.';
+                    }
+                } else if (response.status === 201) {
+                    errorMessage.value = response.data;
+                }
+            } catch (error) {
+                errorMessage.value = error.response?.data || "Erreur lors de la connexion.";
+            }
         };
 
         return {
@@ -89,7 +92,7 @@ export default {
             password,
             errorMessage,
             login,
-            cookies
+            debug
         };
     },
     methods: {
