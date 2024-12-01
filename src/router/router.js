@@ -128,7 +128,7 @@ router.beforeEach(async (to, from, next) => {
       }
     } catch (error) {
       console.error('Erreur de vérification d\'authentification', error);
-      next({ name: 'Login', query: { error: 'Erreur de vérification de session.' } });
+      next({ name: 'Login', query: { error: error.toString() } });
     }
   } else {
     next();
