@@ -124,11 +124,11 @@ router.beforeEach(async (to, from, next) => {
       if (response.status === 200 && response.data.authenticated) {
         next();
       } else {
-        next({ name: 'Login' });
+        next({ name: 'Login', query: { error: 'Non authentifié. Veuillez vous reconnecter.' } });
       }
     } catch (error) {
       console.error('Erreur de vérification d\'authentification', error);
-      next({ name: 'Login' });
+      next({ name: 'Login', query: { error: 'Erreur de vérification de session.' } });
     }
   } else {
     next();

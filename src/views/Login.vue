@@ -27,8 +27,8 @@
                 <p v-if="errorMessage" class="text-danger" style="margin-top: 10px; text-align: center;">
                     {{ errorMessage }}
                 </p>
-                <p v-if="debugMessage" class="text-success" style="margin-top: 10px; text-align: center;">
-                    {{ debugMessage }}
+                <p v-if="$route.query.error" class="text-danger" style="margin-top: 10px; text-align: center;">
+                    {{ $route.query.error }}
                 </p>
             </v-card-text>
             <v-card-actions class="d-flex justify-center">
@@ -43,7 +43,7 @@
 
 <script>
 import axios from 'axios';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
@@ -52,12 +52,7 @@ export default {
         const email = ref('');
         const password = ref('');
         const errorMessage = ref('');
-        const debugMessage = ref('');
         const router = useRouter();
-
-        onMounted(() => {
-            checkSession();
-        })
 
         axios.defaults.withCredentials = true;
 
@@ -80,24 +75,10 @@ export default {
                 });
         };
 
-        const checkSession = () => {
-            axios
-                .get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true })
-                .then((response) => {
-                if (response.status === 200) {
-                    debugMessage.value = 'Session validée avec succès';
-                }
-                })
-                .catch((error) => {
-                    debugMessage.value = 'Erreur lors de la vérification de la session: ' + error;
-                });
-        };
-
         return {
             email,
             password,
             errorMessage,
-            debugMessage,
             login
         };
     },
