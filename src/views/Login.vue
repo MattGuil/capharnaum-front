@@ -75,7 +75,7 @@ export default {
                     
                     if (sessionResponse.status === 200 && sessionResponse.data.authenticated) {
                         debug.value += sessionResponse.status + " ";
-                        // router.push('/explore');
+                        router.push('/explore');
                     } else {
                         errorMessage.value = 'Non authentifié. Veuillez vous reconnecter.';
                     }
