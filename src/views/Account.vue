@@ -1,4 +1,5 @@
 <template>
+    <v-icon @click="logout" class="btn-logout" color="white">mdi-logout</v-icon>
     <div class="profile-card">
         <div>
             <div class="profile-header">
@@ -49,6 +50,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import { onMounted } from 'vue';
 
 export default {
@@ -73,12 +75,32 @@ export default {
     methods: {
         toggleFollow() {
             this.isFollowed = !this.isFollowed;
+        },
+        logout() {
+            try {
+                axios.get(`${import.meta.env.APP_API_URL}/user/logout`, { withCredentials: true })
+                .then(res => {
+                    console.log(res.status);
+                    if (res.status === 200) {
+                        localStorage.removeItem('userId');
+                        this.$router.push('/login');
+                    };
+                });
+            } catch (error) {
+                console.log("Erreur lors de la déconnexion.");
+            }
         }
     }
 };
 </script>
 
 <style scoped>
+.btn-logout {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
 .profile-card {
     width: 100%;
     height: 80vh;
