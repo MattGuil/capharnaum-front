@@ -27,6 +27,9 @@
                 <p v-if="errorMessage" class="text-danger" style="margin-top: 10px; text-align: center;">
                     {{ errorMessage }}
                 </p>
+                <p v-if="debugMessage" class="text-success" style="margin-top: 10px; text-align: center;">
+                    {{ debugMessage }}
+                </p>
             </v-card-text>
             <v-card-actions class="d-flex justify-center">
                 <v-text class="register-link" @click="navigateToRegister">
@@ -49,38 +52,52 @@ export default {
         const email = ref('');
         const password = ref('');
         const errorMessage = ref('');
+        const debugMessage = ref('');
         const router = useRouter();
 
         onMounted(() => {
-            console.log(document.cookie);
+            checkSession();
         })
 
         axios.defaults.withCredentials = true;
 
         const login = () => {
-            axios.post(`${import.meta.env.APP_API_URL}/user/login`, {
-                email: email.value,
-                password: password.value
-            })
-            .then((response) => {
+            axios
+                .post(`${import.meta.env.APP_API_URL}/user/login`, {
+                    email: email.value,
+                    password: password.value
+                })
+                .then((response) => {
+                    if (response.status === 200) {
+                        localStorage.setItem('userId', response.data.userId);
+                        router.push('/explore');
+                    } else if (response.status === 201) {
+                        errorMessage.value = response.data;
+                    }
+                })
+                .catch((error) => {
+                    errorMessage.value = error.response?.data || "Erreur lors de la connexion.";
+                });
+        };
+
+        const checkSession = () => {
+            axios
+                .get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true })
+                .then((response) => {
                 if (response.status === 200) {
-                    localStorage.setItem('userId', response.data.userId);
-                    router.push('/explore');
-                } else if (response.status === 201) {
-                    alert(response.data);
-                    errorMessage.value = response.data;
+                    debugMessage.value = 'Session validée avec succès';
                 }
-            })
-            .catch((error) => {
-                alert(`Erreur de connexion : ${error.response?.data || "Erreur lors de la connexion."}`);
-                errorMessage.value = error.response?.data || "Erreur lors de la connexion.";
-            });
+                })
+                .catch((error) => {
+                    debugMessage.value = 'Erreur lors de la vérification de la session: ' + error;
+                });
         };
 
         return {
             email,
             password,
             errorMessage,
+            debugMessage,
             login
         };
     },
