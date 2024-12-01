@@ -30,6 +30,9 @@
                 <p v-if="$route.query.error" class="text-danger" style="margin-top: 10px; text-align: center;">
                     {{ $route.query.error }}
                 </p>
+                <p v-if="cookies" class="text-info" style="margin-top: 10px; text-align: center;">
+                    {{ cookies }}
+                </p>
             </v-card-text>
             <v-card-actions class="d-flex justify-center">
                 <v-text class="register-link" @click="navigateToRegister">
@@ -43,7 +46,7 @@
 
 <script>
 import axios from 'axios';
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
@@ -56,6 +59,12 @@ export default {
 
         axios.defaults.withCredentials = true;
 
+        const cookies = ref('');
+
+        onMounted(() => {
+            cookies.value = document.cookie;
+        })
+
         const login = () => {
             axios
                 .post(`${import.meta.env.APP_API_URL}/user/login`, {
@@ -65,7 +74,7 @@ export default {
                 .then((response) => {
                     if (response.status === 200) {
                         localStorage.setItem('userId', response.data.userId);
-                        router.push('/explore');
+                        // router.push('/explore');
                     } else if (response.status === 201) {
                         errorMessage.value = response.data;
                     }
@@ -79,7 +88,8 @@ export default {
             email,
             password,
             errorMessage,
-            login
+            login,
+            cookies
         };
     },
     methods: {
