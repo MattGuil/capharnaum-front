@@ -70,7 +70,8 @@ export default {
 
                 if (response.status === 200) {
                     localStorage.setItem('userId', response.data.userId);
-
+                    router.push('/explore');
+                    /*
                     const sessionResponse = await axios.get(`${import.meta.env.APP_BACK_URL}/auth/verify-session`, { withCredentials: true });
                     
                     if (sessionResponse.status === 200 && sessionResponse.data.authenticated) {
@@ -79,6 +80,7 @@ export default {
                     } else {
                         errorMessage.value = 'Non authentifié. Veuillez vous reconnecter.';
                     }
+                    */
                 } else if (response.status === 201) {
                     errorMessage.value = response.data;
                 }
