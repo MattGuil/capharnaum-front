@@ -25,7 +25,7 @@ export default {
 
         const clickOnMarker = (coord, activity) => {
             map.value.flyTo({
-                center: ([coord[0], coord[1] - .025]),
+                center: ([coord[0], coord[1]]),
                 duration: 1000,
                 essential: true
             });

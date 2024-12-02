@@ -23,7 +23,7 @@ export default {
             this.$router.push('/create/activity');
         },
         navigateToProfile() {
-            this.$router.push('/account');
+            this.$router.push(`/profile/${localStorage.getItem('userId')}`);
         },
     },
 }

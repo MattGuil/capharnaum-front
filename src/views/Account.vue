@@ -7,43 +7,41 @@
                     <img src="../assets/user.png" alt="Photo de profil">
                     <span class="rating">4.5</span>
                 </div>
-                <h3>{{ prenom + " " + nom }}</h3>
-                <p class="bio">{{ bio }}</p>
+                <h3 v-if="user" >{{ user.prenom + " " + user.nom }}</h3>
+                <p v-if="user" class="bio">{{ user.bio }}</p>
             </div>
-            <div class="contacts">
+            <div v-if="!itsMe" class="contacts">
                 <v-icon color="blue-darken-2" icon="mdi-message-text-outline" size="24"></v-icon>
-                <!--
                 <div class="action-buttons">
                     <v-btn @click="toggleFollow" class="follow-btn">
                         {{ isFollowed ? 'Following' : 'Follow' }}
                     </v-btn>
                 </div>
-                -->
                 <v-icon color="blue-darken-2" icon="mdi-share-variant" size="24"></v-icon>
             </div>
         </div>
         <div class="stats">
             <div class="stat-item">
-                <h4>{{ activities }}</h4>
+                <h4>{{ 0 }}</h4>
                 <p>Activités</p>
             </div>
             <div class="stat-item">
-                <h4>{{ followers }}</h4>
+                <h4>{{ 0 }}</h4>
                 <p>Followers</p>
             </div>
             <div class="stat-item">
-                <h4>{{ following }}</h4>
+                <h4>{{ 0 }}</h4>
                 <p>Following</p>
             </div>
         </div>
-        <div class="interests">
+        <div v-if="user && user.interests.length > 0"  class="interests">
             <h4>Centres d’intérêt</h4>
             <div class="interest-cards">
-                <div v-for="interest in interests" :key="interest" class="interest-card"></div>
+                <div v-for="interest in user.interests" :key="interest" class="interest-card"></div>
             </div>
         </div>
-        <div class="buttons">
-            <button class="profile-button">Mes favoris</button>
+        <div v-if="itsMe" class="buttons">
+            <button @click="navigateToFavorites" class="profile-button">Mes favoris</button>
             <button class="profile-button">Mes activités</button>
         </div>
     </div>
@@ -51,30 +49,55 @@
 
 <script>
 import axios from 'axios';
-import { onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 export default {
     name: 'Profile',
-    setup() {
+    props: {
+        id: {
+            type: String,
+            required: true
+        }
+    },
+    setup(props) {
+
+        const user = ref(null);
+
+        const fetchUserData = async (userId) => {
+            try {
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/user/${userId}`);
+                if (response.status === 200) {
+                    user.value = response.data;
+                    console.log(user);
+                } else {
+                    console.log("Erreur lors de la récupération de l'utilisateur");
+                }
+            } catch (error) {
+                console.error("Erreur de connexion ou autre :", error);
+            }
+        };
 
         onMounted(() => {
-            console.log(localStorage.getItem('userId'));
-        })
+            fetchUserData(props.id);
+        });
+
+        watch(
+            () => props.id,
+            (newId) => {
+                fetchUserData(newId);
+            }
+        );
 
         return {
-            nom: "Ben Jabeur",
-            prenom: "Jawher",
-            bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-            activities: 0,
-            followers: 0,
-            following: 0,
-            isFollowed: false,
-            interests: [1, 2, 3]
+            user
         };
     },
     methods: {
         toggleFollow() {
             this.isFollowed = !this.isFollowed;
+        },
+        navigateToFavorites() {
+            this.$router.push(`/profile/favorites`);
         },
         logout() {
             try {
@@ -90,7 +113,13 @@ export default {
                 console.log("Erreur lors de la déconnexion.");
             }
         }
+    },
+    computed: {
+        itsMe() {
+            return this.id == localStorage.getItem('userId');
+        }
     }
+
 };
 </script>
 
@@ -114,7 +143,7 @@ export default {
     bottom: 8vh;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 .profile-header {

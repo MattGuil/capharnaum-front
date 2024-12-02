@@ -33,9 +33,10 @@ const routes = [
     component: Register,
   },
   {
-    path: '/account',
+    path: '/profile/:id',
     name: 'Account',
     component: Account,
+    props: true,
     meta: { requiresAuth: true },
   },
   {
@@ -45,7 +46,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/account/favorites',
+    path: '/profile/favorites',
     name: 'AccountFavorites',
     component: AccountFavorites,
     meta: { requiresAuth: true },
