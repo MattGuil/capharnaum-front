@@ -4,39 +4,34 @@
 
         <v-card class="elevation-0 w-100 pa-10 card-container">
             <h1 v-if="activity">{{ activity.title }}</h1>
+            <h2 v-if="activity" class="event-title">{{ activity.place }}</h2>
             
             <div class="event-details">
-                <h2 class="event-title">{{ event.title }}</h2>
-
                 <div class="event-info">
-                    <p>
-                        📍 <a :href="event.locationUrl" target="_blank">
-                            {{ event.location }}
-                        </a>
-                    </p>
-                    <p>⏰ {{ event.time }}</p>
+                    <p v-if="activity">📍 {{ activity.location }}</p>
+                    <p v-if="activity">⏰ {{ activity.startTime + ' - ' + activity.endTime }}</p>
                 </div>
 
-                <p class="event-description">{{ event.description }}</p>
+                <p v-if="activity" class="event-description">{{ activity.description }}</p>
 
                 <div class="event-buttons">
                     <button class="btn btn-participate" @click="showPopup = true">
-                        <i class="fas fa-check-circle"></i> Je participe
+                        Je participe
                     </button>
                     <button class="btn btn-message">
-                        <i class="fas fa-envelope"></i> Envoyer un message
+                        Envoyer un message
                     </button>
                 </div>
 
                 <div class="social-actions">
                     <button @click="shareEvent" class="action-btn">
-                        <i class="fas fa-paper-plane"></i> Partager
+                        Partager
                     </button>
                     <button @click="commentEvent" class="action-btn">
-                        <i class="fas fa-comment-dots"></i> Commenter <span class="badge">{{ event.commentsCount }}</span>
+                        Commenter <span class="badge">{{ event.commentsCount }}</span>
                     </button>
                     <button @click="rateEvent" class="action-btn">
-                        <i class="fas fa-star"></i> Noter <span class="rating">{{ event.rating }}</span>
+                        Noter <span class="rating">{{ event.rating }}</span>
                     </button>
                 </div>
             </div>
@@ -118,9 +113,22 @@ export default {
             console.log(srcImage.value);
         });
 
-        const handleParticipate = () => {
+        const handleParticipate = async () => {
             showPopup.value = false;
-            // snackbarVisible.value = false;
+            try {
+                const response = await axios.post(`${import.meta.env.APP_API_URL}/participation`, {
+                    user: localStorage.getItem('userId'),
+                    activity: activity.value._id
+                });
+                if (response.status === 201) {
+                    snackbarVisible.value = true;
+                } else {
+                    this.errorMessage = "Erreur lors de la création de l'activité.";
+                }
+            } catch (error) {
+                this.errorMessage = "Erreur de connexion ou autre.";
+                console.error("Erreur lors de la création de l'activité", error);
+            }
         };
 
         const handleCancel = () => {
@@ -176,18 +184,14 @@ export default {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-bottom: 5px solid rgba(0, 0, 0, 0.1);
 }
 
 /* La carte */
 .card-container {
-    width: 80%;
-    max-width: 600px;
+    width: 100%;
+    height: 80vh;
     background: rgba(255, 255, 255, 1);
-    border-radius: 20px;
     padding: 20px;
-    margin-top: -10vh;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     z-index: 1;
     max-height: 100%;
     overflow-y: auto;
@@ -195,11 +199,6 @@ export default {
 
 h1 {
     margin-bottom: 20px;
-    text-align: center;
-}
-
-.event-details {
-    padding: 20px;
 }
 
 .event-title {
@@ -278,6 +277,8 @@ h1 {
 
 /* Actions sociales */
 .social-actions {
+    display: none;
+    /*
     display: flex;
     justify-content: space-around;
     margin-top: 10px;
@@ -285,6 +286,7 @@ h1 {
     font-size: 18px;
     color: #666;
     border-top: 1px solid #eee;
+    */
 }
 
 .action-btn {
