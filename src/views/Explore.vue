@@ -101,6 +101,7 @@ export default {
 
 #explore-container {
     position: relative;
+    background: rgba(255, 255, 255, .8);
 }
 
 .search-bar-container {
