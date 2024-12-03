@@ -59,6 +59,10 @@ export default {
 
 <style scoped>
 
+.v-main {
+    background-image: ;
+}
+
 .v-card {
     width: 100%;
     height: 80vh;

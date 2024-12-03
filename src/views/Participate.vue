@@ -5,7 +5,7 @@
   
       <div v-if="showPopup" class="popup-overlay">
         <div class="popup">
-          <img src="votre-image.jpg" alt="Illustration" class="popup-image" />
+          <img src="" alt="Illustration" class="popup-image" />
           <h2>Souhaitez-vous participer à Peinture ?</h2>
           <div class="popup-buttons">
             <button class="participate" @click="handleParticipate">Je participe</button>
