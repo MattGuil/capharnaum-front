@@ -52,7 +52,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/account/my-activities',
+    path: '/profile/activities',
     name: 'AccountActivities',
     component: AccountActivities,
     meta: { requiresAuth: true },

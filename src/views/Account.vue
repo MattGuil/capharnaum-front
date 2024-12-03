@@ -22,7 +22,7 @@
         </div>
         <div class="stats">
             <div class="stat-item">
-                <h4>{{ 0 }}</h4>
+                <h4>{{ (activities) ? activities.length : 0 }}</h4>
                 <p>Activités</p>
             </div>
             <div class="stat-item">
@@ -42,7 +42,7 @@
         </div>
         <div v-if="itsMe" class="buttons">
             <button @click="navigateToFavorites" class="profile-button">Mes favoris</button>
-            <button class="profile-button">Mes activités</button>
+            <button @click="navigateToProfileActivities" class="profile-button">Mes activités</button>
         </div>
     </div>
 </template>
@@ -62,6 +62,7 @@ export default {
     setup(props) {
 
         const user = ref(null);
+        const activities = ref(null);
 
         const fetchUserData = async (userId) => {
             try {
@@ -71,6 +72,23 @@ export default {
                     console.log(user);
                 } else {
                     console.log("Erreur lors de la récupération de l'utilisateur");
+                }
+            } catch (error) {
+                console.error("Erreur de connexion ou autre :", error);
+            }
+
+            try {
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity`, {
+                    headers: {
+                        'user-id': userId
+                    }
+                });
+                if (response.status === 200) {
+                    activities.value = response.data;
+                    console.log(activities);
+                    localStorage.setItem('activities', JSON.stringify(activities.value));
+                } else {
+                    console.log("Erreur lors de la récupération des activités de l'utilisateur");
                 }
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
@@ -89,7 +107,8 @@ export default {
         );
 
         return {
-            user
+            user,
+            activities
         };
     },
     methods: {
@@ -98,6 +117,9 @@ export default {
         },
         navigateToFavorites() {
             this.$router.push(`/profile/favorites`);
+        },
+        navigateToProfileActivities() {
+            this.$router.push(`/profile/activities`);
         },
         logout() {
             try {
