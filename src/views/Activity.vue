@@ -1,13 +1,10 @@
 <template>
     <v-main class="main-container">
-        <!-- Section avec l'image en haut -->
         <div class="banner" :style="{ backgroundImage: `url(${srcImage})` }"></div>
 
-        <!-- La carte en dessous -->
         <v-card class="elevation-0 w-100 pa-10 card-container">
             <h1 v-if="activity">{{ activity.title }}</h1>
             
-            <!-- Informations de l'événement -->
             <div class="event-details">
                 <h2 class="event-title">{{ event.title }}</h2>
 
@@ -20,10 +17,8 @@
                     <p>⏰ {{ event.time }}</p>
                 </div>
 
-                <!-- Description -->
                 <p class="event-description">{{ event.description }}</p>
 
-                <!-- Boutons d'interaction -->
                 <div class="event-buttons">
                     <button class="btn btn-participate" @click="showPopup = true">
                         <i class="fas fa-check-circle"></i> Je participe
@@ -33,7 +28,6 @@
                     </button>
                 </div>
 
-                <!-- Actions sociales -->
                 <div class="social-actions">
                     <button @click="shareEvent" class="action-btn">
                         <i class="fas fa-paper-plane"></i> Partager
@@ -46,10 +40,13 @@
                     </button>
                 </div>
             </div>
+
+            <v-snackbar v-model="snackbarVisible" :timeout="3000" location="bottom center" color="green">
+                Vous êtes inscrit !
+            </v-snackbar>
         </v-card>
     </v-main>
 
-    <!-- Popup -->
     <div v-if="showPopup" class="popup-overlay">
         <div class="popup">
             <img :src="srcImage" alt="Illustration" class="popup-image" />
@@ -88,6 +85,8 @@ export default {
         });
 
         const showPopup = ref(false);
+        
+        const snackbarVisible = ref(false);
 
         const loadImage = () => {
             let imageSrc = '';
@@ -116,18 +115,15 @@ export default {
             }
 
             srcImage.value = loadImage();
-            console.log(srcImage.value); // Vérifiez l'URL de l'image
+            console.log(srcImage.value);
         });
 
         const handleParticipate = () => {
-            console.log("Vous participez à l'événement.");
-            alert("Merci pour votre participation !");
             showPopup.value = false;
+            // snackbarVisible.value = false;
         };
 
         const handleCancel = () => {
-            console.log("Participation annulée.");
-            alert("Vous avez changé d’avis.");
             showPopup.value = false;
         };
 
@@ -151,6 +147,7 @@ export default {
             srcImage,
             event,
             showPopup,
+            snackbarVisible,
             handleParticipate,
             handleCancel,
             shareEvent,
@@ -186,7 +183,7 @@ export default {
 .card-container {
     width: 80%;
     max-width: 600px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 1);
     border-radius: 20px;
     padding: 20px;
     margin-top: -10vh;
