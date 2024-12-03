@@ -1,6 +1,8 @@
 <template>
-    <h1 v-if="activity">{{ activity.title }}</h1>
-    <p v-else>Chargement de l'activité...</p>
+    <v-card class="elevation-0 w-100 pa-10">
+        <h1 v-if="activity">{{ activity.title }}</h1>
+        <img :src="srcImage" alt="">
+    </v-card>
 </template>
 
 <script>
@@ -17,6 +19,17 @@ export default {
     },
     setup(props) {
         const activity = ref(null);
+        const srcImage = ref('');
+
+        const loadImage = () => {
+            let imageSrc = '';
+            try {
+                imageSrc = new URL(`../assets/${activity.value.discipline.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}.jpg`, import.meta.url).href;
+            } catch (error) {
+                console.error('Image not found:', error);
+            }
+            return imageSrc;
+        }
 
         onMounted(async () => {
             try {
@@ -31,10 +44,13 @@ export default {
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
             }
+
+            srcImage.value = loadImage();
         });
 
         return {
-            activity
+            activity,
+            srcImage
         };
     }
 };
@@ -43,6 +59,21 @@ export default {
 
 <style scoped>
 
+.v-card {
+    width: 100%;
+    height: 80vh;
+    margin-top: 12vh;
+    padding-bottom: 8vh;
+    background: rgba(255, 255, 255, .8);
+    border-radius: 20px 20px 0 0;
+}
 
+h1 {
+    margin-bottom: 20px;
+}
+
+img {
+    width: 100%;
+}
 
 </style>
