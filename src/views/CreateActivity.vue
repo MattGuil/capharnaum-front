@@ -86,6 +86,7 @@
                         <v-time-picker
                             v-if="startTimeMenu"
                             v-model="form.startTime"
+                            format="24hr"
                             color="green-lighten-1"
                         ></v-time-picker>
                     </v-menu>                   
