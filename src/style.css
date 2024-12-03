@@ -21,17 +21,12 @@ button {
 }
 
 .v-main {
-  height: 100vh;
   background: linear-gradient(
     rgba(96, 166, 160, 0.2),
     rgba(60, 71, 152, 0.2),
     rgba(43, 45, 108, 0.2),
     rgba(185, 66, 71, 0.2)
   );
-}
-
-.v-container {
-  height: 100vh;
 }
 
 .maplibregl-ctrl * {

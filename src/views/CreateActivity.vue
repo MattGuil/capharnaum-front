@@ -152,8 +152,6 @@
             {{ errorMessage }}
         </p>
 
-        <div class="margin"></div>
-
         <v-snackbar v-model="snackbarVisible" :timeout="3000" location="bottom center" color="green">
             "{{ this.form.title }}" créé(e) avec succès !
         </v-snackbar>
@@ -282,10 +280,6 @@ export default {
 
 form {
     margin-top: 50px;
-}
-
-.margin {
-    height: 4vh;
 }
 
 </style>  

@@ -99,6 +99,10 @@ export default {
 
 <style scoped>
 
+.v-container {
+    height: 100vh;
+}
+
 img {
     width: 50px;
     height: fit-content;
@@ -111,4 +115,5 @@ img {
     cursor: pointer;
     position: absolute;
 }
+
 </style>  
