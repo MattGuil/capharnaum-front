@@ -66,58 +66,55 @@
                 :rules="form.type != '' && form.type !== 'cours' || form.type !== 'pratique' ? [rules.required] : []"
             ></v-date-input>
 
-            <div class="time-pickers">
-                <!-- Horaire de début -->
-                <v-text-field
-                    v-model="form.startTime"
-                    label="Heure de début"
-                    :active="startTimeMenu"
-                    :focus="startTimeMenu"
-                    readonly
-                    variant="solo"
-                    :rules="[rules.required]"
+            <!-- Horaire de début -->
+            <v-text-field
+                v-model="form.startTime"
+                label="Heure de début"
+                :active="startTimeMenu"
+                :focus="startTimeMenu"
+                readonly
+                variant="solo"
+                :rules="[rules.required]"
+            >
+                <v-menu
+                    v-model="startTimeMenu"
+                    :close-on-content-click="true"
+                    activator="parent"
+                    transition="scale-transition"
                 >
-                    <v-menu
-                        v-model="startTimeMenu"
-                        :close-on-content-click="true"
-                        activator="parent"
-                        transition="scale-transition"
-                    >
-                        <v-time-picker
-                            v-if="startTimeMenu"
-                            v-model="form.startTime"
-                            format="24hr"
-                            color="green-lighten-1"
-                        ></v-time-picker>
-                    </v-menu>                   
-                </v-text-field>
+                    <v-time-picker
+                        v-if="startTimeMenu"
+                        v-model="form.startTime"
+                        format="24hr"
+                        color="#3c4798"
+                    ></v-time-picker>
+                </v-menu>                   
+            </v-text-field>
 
-                <!-- Horaire de fin -->
-                <v-text-field
-                    v-model="form.endTime"
-                    label="Heure de fin"
-                    :active="endTimeMenu"
-                    :focus="endTimeMenu"
-                    readonly
-                    variant="solo"
-                    :rules="[rules.required]"
+            <!-- Horaire de fin -->
+            <v-text-field
+                v-model="form.endTime"
+                label="Heure de fin"
+                :active="endTimeMenu"
+                :focus="endTimeMenu"
+                readonly
+                variant="solo"
+                :rules="[rules.required]"
+            >
+                <v-menu
+                    v-model="endTimeMenu"
+                    :close-on-content-click="true"
+                    activator="parent"
+                    transition="scale-transition"
                 >
-                    <v-menu
-                        v-model="endTimeMenu"
-                        :close-on-content-click="true"
-                        activator="parent"
-                        transition="scale-transition"
-                    >
-                        <v-time-picker
-                            v-if="endTimeMenu"
-                            v-model="form.endTime"
-                            format="24hr"
-                            color="pink"
-                            header-color="primary"
-                        ></v-time-picker>
-                    </v-menu>                   
-                </v-text-field>
-            </div>
+                    <v-time-picker
+                        v-if="endTimeMenu"
+                        v-model="form.endTime"
+                        format="24hr"
+                        color="#3c4798"
+                    ></v-time-picker>
+                </v-menu>                   
+            </v-text-field>
 
             <!-- Description de l'activité -->
             <v-textarea
@@ -191,8 +188,8 @@ export default {
                 startTime: '18:00',
                 endTime: '20:00',
                 description: 'Cours de danse pour débutant.',
-                price: '0',
-                maxParticipants: '5'
+                price: 0.0,
+                maxParticipants: 5
             },
 
             rules: {

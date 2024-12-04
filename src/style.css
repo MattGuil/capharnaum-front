@@ -16,10 +16,6 @@ a {
   color: black;
 }
 
-button {
-  color: white !important;
-}
-
 .v-main {
   background: linear-gradient(
     rgba(96, 166, 160, 0.2),
