@@ -29,6 +29,10 @@ a {
   display: none !important;
 }
 
+.mdi {
+  color: "#3c4798";
+}
+
 .v-bottom-navigation {
   height: 8vh !important;
 }

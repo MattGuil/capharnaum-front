@@ -1,118 +1,120 @@
 <template>
-  <div class="favorites-list">
-    <h2>Mes favoris</h2>
-    <div class="activity-card" v-for="activity in activities" :key="activity.id">
-      <img :src="activity.image" alt="Activity Image" class="activity-image" />
-      <div class="activity-details">
-        <h3>{{ activity.title }}</h3>
-        <p><strong>Horaires:</strong> {{ activity.schedules }}</p>
-        <p><strong>Adresse:</strong> {{ activity.address }}</p>
-      </div>
-      <v-icon class="favorite-icon">mdi-heart</v-icon>
-    </div>
-  </div>
+	<div class="favorites-list">
+		<h2>Mes favoris</h2>
+		<div @click="$router.push(`/activity/${favorite._id}`);" class="favorite-card" v-for="favorite in favorites" :key="favorite._id">
+			<i class="mdi mdi-heart"></i>
+			<img :src="favorite.srcImage" alt="Activity Image" class="activity-image" />
+			<div class="activity-details">
+				<h3>{{ favorite.title }}</h3>
+				<p><strong>Horaires :</strong> {{ favorite.startTime + " - " + favorite.endTime }}</p>
+				<p><strong>Adresse :</strong> {{ favorite.location }}</p>
+			</div>
+		</div>
+	</div>
 </template>
-  
+
 <script>
+import axios from 'axios';
+import { ref, onMounted } from 'vue';
+
 export default {
-  data() {
-    return {
-      activities: [
-        {
-          id: 1,
-          title: "MUSIQUE - JAM",
-          schedules: "20h - 23h",
-          address: "202 Crd Rue de la Guillotière, 69007 Lyon",
-          image: "https://via.placeholder.com/100"
-        },
-        {
-          id: 2,
-          title: "PEINTURE - Café",
-          schedules: "16h - 17h",
-          address: "8 Pl. du Griffon, 69001 Lyon",
-          image: "https://via.placeholder.com/100"
-        },
-        {
-          id: 3,
-          title: "CERCEAU - Aérien",
-          schedules: "21h - 23h",
-          address: "201 Av. Berthelot, 69007 Lyon",
-          image: "https://via.placeholder.com/100"
-        },
-        {
-          id: 4,
-          title: "CROCHET - Café",
-          schedules: "14h - 16h",
-          address: "8 Pl. du Griffon, 69001 Lyon",
-          image: "https://via.placeholder.com/100"
+	setup() {
+		const favorites = ref([]);
+		
+		const loadImage = (discipline) => {
+            let imageSrc = '';
+            try {
+                imageSrc = new URL(`../assets/${discipline.normalize('NFD').replace(/[\u0300-\u036f]/g, '')}.jpg`, import.meta.url).href;
+            } catch (error) {
+                console.error('Image not found:', error);
+            }
+            return imageSrc;
         }
-      ]
-    };
-  }
+
+		onMounted(async () => {
+			try {
+				const response = await axios.get(`${import.meta.env.APP_API_URL}/favorite/user/${localStorage.getItem('userId')}`);
+
+				if (response.status === 200) {
+					response.data.forEach(elem => {
+						const activity = elem.activity;
+						activity.srcImage = loadImage(activity.discipline);
+						favorites.value.push(activity);
+					})
+				} else {
+					console.log("Erreur lors de la récupération des favoris")
+				}
+			} catch (error) {
+				console.error("Erreur de connexion ou autre :", error);
+			}
+		})
+
+		return { favorites }
+	}
 };
 </script>
-  
+
 <style scoped>
-/* Utiliser le même gradient pour le fond */
-body {
-  background: linear-gradient(to bottom, #e5efff, #f2e3ff);
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-}
 
 .favorites-list {
-  padding: 20px;
-  padding-bottom: 10vh;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+	padding: 20px;
+	padding-bottom: 10vh;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 20px;
 }
 
-.activity-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, .8);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out;
+.favorite-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 15px;
+	border: 1px solid #ddd;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, .8);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	transition: transform 0.2s ease-in-out;
+	position: relative;
 }
 
-.activity-card:hover {
-  transform: scale(1.05);
+.favorite-card:hover {
+	transform: scale(1.05);
 }
 
 .activity-image {
-  width: 100%;
-  height: 150px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  object-fit: cover;
+	width: 100%;
+	height: 150px;
+	border-radius: 10px;
+	margin-bottom: 15px;
+	object-fit: cover;
 }
 
 .activity-details {
-  text-align: center;
+	text-align: center;
 }
 
 .activity-details h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  color: #333;
+	margin: 0 0 10px;
+	font-size: 18px;
+	color: #333;
 }
 
 .activity-details p {
-  margin: 5px 0;
-  font-size: 14px;
-  color: #666;
+	margin: 5px 0;
+	font-size: 14px;
+	color: #666;
 }
 
-.favorite-icon {
-  color: red;
-  font-size: 24px;
-  margin-top: 10px;
+.mdi {
+	margin-bottom: 10px;
 }
+
+.mdi-heart-outline {
+    color: black;
+}
+
+.mdi-heart {
+    color: red;
+}
+
 </style>
-  

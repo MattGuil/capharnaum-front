@@ -9,7 +9,8 @@
             <activityCard 
                 v-for="activity in activities" 
                 :key="activity.id" 
-                :activity="activity" 
+                :activity="activity"
+                @fav-updated="updateFav"
             />
         </div>
     </div>
@@ -27,6 +28,11 @@ export default {
         activities: {
             type: Array,
             required: true
+        }
+    },
+    methods: {
+        updateFav() {
+            this.$emit('fav-updated');
         }
     }
 }
@@ -59,11 +65,11 @@ export default {
 }
 
 .activity-cards-container {
-    margin-top: 50px;
-    padding: 10px;
+    margin-top: 40px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
     gap: .5em;
+    padding: 10px;
 }
 
 </style>

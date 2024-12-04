@@ -1,10 +1,9 @@
 <template>
     <div id="explore-container">
         <maptiler 
-            :activities="filteredActivities"
+            :activities="filteredActivitiesMap"
             id="map"
-            @toggle-catalog="clickOnMap"
-            @activity-selected="previewActivity"
+            @activity-selected="filterActivitiesCatalog"
         />
         <div class="search-bar-container">
             <div class="search-bar">
@@ -15,7 +14,7 @@
         </div>
         <catalog 
             :class="{ shown: showCatalog, hidden: !showCatalog }" 
-            :activities="filteredActivities"
+            :activities="filteredActivitiesCatalog"
             id="catalog" 
             @toggle-catalog="clickOnKnob"    
         />
@@ -35,15 +34,14 @@ export default {
         catalog
     },
     setup() {
+        
         let searchVal = ref('');
-        const activities = ref(null);
-        const filteredActivities = ref(null);
-        const showCatalog = ref(false);
 
-        const generateRandomColor = () => {
-            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
-            return randomColor;
-        }
+        const activities = ref(null);
+        const filteredActivitiesMap = ref(null);
+        const filteredActivitiesCatalog = ref(null);
+
+        const showCatalog = ref(false);
 
         onMounted(async () => {
             try {
@@ -51,13 +49,8 @@ export default {
                 
                 if (response.status === 200) {
                     activities.value = response.data;
-
-                    activities.value.forEach(activity => {
-                        activity.color = generateRandomColor();
-                    })
-
-                    filteredActivities.value = activities.value;
-                    console.log(activities);
+                    filteredActivitiesMap.value = activities.value;
+                    filteredActivitiesCatalog.value = activities.value;
                 } else {
                     console.log("Erreur lors de la récupération des activités");
                 }
@@ -68,9 +61,13 @@ export default {
 
         const filterActivities = () => {
             if (!searchVal.value) {
-                filteredActivities.value = activities.value;
+                filteredActivitiesMap.value = activities.value;
+                filteredActivitiesCatalog.value = activities.value;
             } else {
-                filteredActivities.value = activities.value.filter(activity =>
+                filteredActivitiesMap.value = activities.value.filter(activity =>
+                    activity.title.toLowerCase().includes(searchVal.value.toLowerCase())
+                );
+                filteredActivitiesCatalog.value = activities.value.filter(activity =>
                     activity.title.toLowerCase().includes(searchVal.value.toLowerCase())
                 );
             }
@@ -80,17 +77,23 @@ export default {
             if (!searchVal.value) filterActivities();
         });
 
-        return { searchVal, activities, showCatalog, filteredActivities, filterActivities };
+        return { 
+            activities,
+            searchVal,
+            showCatalog,
+            filteredActivitiesMap,
+            filteredActivitiesCatalog, 
+            filterActivities
+        };
     },
     methods: {
         clickOnKnob() {
             this.showCatalog = !this.showCatalog;
         },
-        clickOnMap() {
-            if (this.showCatalog) this.showCatalog = false;
-        },
-        previewActivity(activity) {
-            console.log(activity.title);
+        filterActivitiesCatalog(activitySelected) {
+            this.filteredActivitiesCatalog = this.activities.filter(activity =>
+                activity._id == activitySelected._id
+            );
         }
     }
 };

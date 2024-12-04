@@ -1,6 +1,6 @@
 <template>
     <div class="map-wrap">
-        <div class="map" ref="mapContainer" @click="$emit('toggle-catalog')"></div>
+        <div class="map" ref="mapContainer"></div>
     </div>
 </template>
 
@@ -25,7 +25,8 @@ export default {
 
         const clickOnMarker = (coord, activity) => {
             map.value.flyTo({
-                center: ([coord[0], coord[1]]),
+                center: ([coord[0], coord[1] - .02]),
+                zoom: 11,
                 duration: 1000,
                 essential: true
             });
@@ -33,7 +34,7 @@ export default {
         };
 
         const addMarker = (coord, activity) => {
-            const marker = new Marker({ color: activity.color })
+            const marker = new Marker({ color: "#3c4798" })
                 .setLngLat([coord[0], coord[1]])
                 .addTo(map.value);
 

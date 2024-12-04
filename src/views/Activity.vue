@@ -3,6 +3,8 @@
         <div class="banner" :style="{ backgroundImage: `url(${srcImage})` }"></div>
 
         <v-card class="elevation-0 w-100 pa-10 card-container">
+            <i @click="updateFavorites()" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
+
             <h1 v-if="activity">{{ activity.title }}</h1>
             <h2 v-if="activity" class="event-title">{{ activity.place }}</h2>
             
@@ -28,10 +30,10 @@
                         Partager
                     </button>
                     <button @click="commentEvent" class="action-btn">
-                        Commenter <span class="badge">{{ event.commentsCount }}</span>
+                        Commenter <span class="badge">0</span>
                     </button>
                     <button @click="rateEvent" class="action-btn">
-                        Noter <span class="rating">{{ event.rating }}</span>
+                        Noter <span class="rating">0</span>
                     </button>
                 </div>
             </div>
@@ -45,7 +47,7 @@
     <div v-if="showPopup" class="popup-overlay">
         <div class="popup">
             <img :src="srcImage" alt="Illustration" class="popup-image" />
-            <h2>Souhaitez-vous participer à {{ event.title }} ?</h2>
+            <h2>Souhaitez-vous participer à {{ activity.title }} ?</h2>
             <div class="popup-buttons">
                 <button class="participate" @click="handleParticipate">Je participe</button>
                 <button class="cancel" @click="handleCancel">J’ai changé d’avis</button>
@@ -69,15 +71,7 @@ export default {
     setup(props) {
         const activity = ref(null);
         const srcImage = ref('');
-        const event = ref({
-            title: 'GROUPE DE DANSE - Confluence',
-            location: '86 Quai Perrache, 69002 Lyon',
-            locationUrl: 'https://maps.google.com?q=86+Quai+Perrache,+69002+Lyon',
-            time: '18h - 21h',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            commentsCount: 17,
-            rating: '4/5',
-        });
+        const isFav = ref(false);
 
         const showPopup = ref(false);
         
@@ -99,7 +93,7 @@ export default {
         onMounted(async () => {
             try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/${props.id}`);
-                console.log(response.data);  // Vérifiez les données
+                console.log(response.data);
                 if (response.status === 200) {
                     activity.value = response.data;
                 } else {
@@ -110,7 +104,20 @@ export default {
             }
 
             srcImage.value = loadImage();
-            console.log(srcImage.value);
+
+            try {
+                const response = await axios.get(
+                    `${import.meta.env.APP_API_URL}/favorite/check/${localStorage.getItem('userId')}/${activity.value._id}`
+                );
+                
+                if (response.status === 200) {
+                    isFav.value = true;
+                } else {
+                    isFav.value = false;
+                }
+            } catch (error) {
+                console.error("Erreur de connexion ou autre :", error);
+            }
         });
 
         const handleParticipate = async () => {
@@ -153,7 +160,7 @@ export default {
         return {
             activity,
             srcImage,
-            event,
+            isFav,
             showPopup,
             snackbarVisible,
             handleParticipate,
@@ -162,6 +169,32 @@ export default {
             commentEvent,
             rateEvent
         };
+    },
+    methods: {
+        async updateFavorites() {
+            try {
+                let response;
+
+                if (this.isFav) {
+                    response = await axios.delete(
+                        `${import.meta.env.APP_API_URL}/favorite/${localStorage.getItem('userId')}/${this.activity._id}`
+                    );
+                } else {
+                    response = await axios.post(`${import.meta.env.APP_API_URL}/favorite`, {
+                        user: localStorage.getItem('userId'),
+                        activity: this.activity._id
+                    });
+                }
+
+                if (response.status === 200 || response.status === 201) {
+                    this.isFav = !this.isFav;
+                } else {
+                    console.log("Erreur lors de la mise à jour des favoris");
+                }
+            } catch (error) {
+                console.error("Erreur de connexion ou autre :", error);
+            }
+        }
     }
 };
 </script>
@@ -365,5 +398,19 @@ h1 {
 .cancel {
     background-color: #e57373;
     color: white;
+}
+
+.mdi {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.mdi-heart-outline {
+    color: black;
+}
+
+.mdi-heart {
+    color: red;
 }
 </style>
