@@ -12,6 +12,7 @@
                         v-model="email"
                         label="Email"
                         type="email"
+                        autocomplete="off"
                         required
                     ></v-text-field>
                     <v-text-field
