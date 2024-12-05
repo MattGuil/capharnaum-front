@@ -22,6 +22,7 @@ export default {
         const mapContainer = ref(null);
         const map = ref(null);
         const markers = ref([]);
+        const isMarkerClicked = ref(false);
 
         const clickOnMarker = (coord, activity) => {
             map.value.flyTo({
@@ -30,7 +31,8 @@ export default {
                 duration: 1000,
                 essential: true
             });
-            emit('activity-selected', activity);
+            emit('marker-clicked', activity);
+            isMarkerClicked.value = true;
         };
 
         const addMarker = (coord, activity) => {
@@ -83,6 +85,24 @@ export default {
             }
         };
 
+        const centerOnActivity = (activity) => {
+            if (activity && activity.location) {
+                geocoding.forward(activity.location).then((result) => {
+                    const coord = result.features[0]?.center;
+                    if (coord && coord.length === 2) {
+                        map.value.flyTo({
+                            center: ([coord[0], coord[1] - .02]),
+                            zoom: 11,
+                            duration: 1000,
+                            essential: true
+                        });
+                    }
+                }).catch((error) => {
+                    console.error('Erreur de géocodage pour centrer la carte :', error);
+                });
+            }
+        };
+
         watch(() => props.activities, () => {
             updateMarkers();
         });
@@ -97,6 +117,35 @@ export default {
                 navigationControl: false
             });
 
+            map.value.on('click', (event) => {
+                if (!isMarkerClicked.value) {
+                    emit('map-clicked');
+                } else {
+                    isMarkerClicked.value = false;
+                }
+            });
+
+            const centerOnUserLocation = () => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const { latitude, longitude } = position.coords;
+                        
+                        map.value.flyTo({
+                            center: [longitude, latitude],
+                            zoom: 11,
+                            duration: 1000,
+                            essential: true
+                        });
+                    }, (error) => {
+                        console.error("Erreur de géolocalisation :", error);
+                    });
+                } else {
+                    console.error("La géolocalisation n'est pas supportée par ce navigateur.");
+                }
+            };
+
+            centerOnUserLocation();
+
             updateMarkers();
         });
 
@@ -105,7 +154,8 @@ export default {
         });
 
         return {
-            mapContainer
+            mapContainer,
+            centerOnActivity
         };
     }
 };

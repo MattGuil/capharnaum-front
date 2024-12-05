@@ -1,9 +1,11 @@
 <template>
     <div id="explore-container">
         <maptiler 
-            :activities="filteredActivitiesMap"
             id="map"
-            @activity-selected="filterActivitiesCatalog"
+            ref="map"
+            :activities="filteredActivitiesMap"
+            @map-clicked="deselectActivity"
+            @marker-clicked="filterActivitiesCatalog"
         />
         <div class="search-bar-container">
             <div class="search-bar">
@@ -13,7 +15,7 @@
             </div>
         </div>
         <catalog 
-            :class="{ shown: showCatalog, hidden: !showCatalog }" 
+            :class="{ shown: showCatalog, hidden: !showCatalog, squeeze: (filteredActivitiesCatalog && filteredActivitiesCatalog.length == 1) }" 
             :activities="filteredActivitiesCatalog"
             id="catalog" 
             @toggle-catalog="clickOnKnob"    
@@ -42,6 +44,9 @@ export default {
         const filteredActivitiesCatalog = ref(null);
 
         const showCatalog = ref(false);
+        const isActivitySelected = ref(false);
+
+        const map = ref(null);
 
         onMounted(async () => {
             try {
@@ -61,6 +66,7 @@ export default {
 
         const filterActivities = () => {
             if (!searchVal.value) {
+                showCatalog.value = false;
                 filteredActivitiesMap.value = activities.value;
                 filteredActivitiesCatalog.value = activities.value;
             } else {
@@ -70,6 +76,12 @@ export default {
                 filteredActivitiesCatalog.value = activities.value.filter(activity =>
                     activity.title.toLowerCase().includes(searchVal.value.toLowerCase())
                 );
+                showCatalog.value = true;
+            }
+
+            if (filteredActivitiesMap.value.length === 1) {
+                const activity = filteredActivitiesMap.value[0];
+                map.value.centerOnActivity(activity);
             }
         };
 
@@ -81,9 +93,11 @@ export default {
             activities,
             searchVal,
             showCatalog,
+            isActivitySelected,
             filteredActivitiesMap,
             filteredActivitiesCatalog, 
-            filterActivities
+            filterActivities,
+            map
         };
     },
     methods: {
@@ -94,6 +108,14 @@ export default {
             this.filteredActivitiesCatalog = this.activities.filter(activity =>
                 activity._id == activitySelected._id
             );
+            this.showCatalog = true;
+            this.isActivitySelected = true;
+        },
+        deselectActivity() {
+            if (this.isActivitySelected) {
+                this.filterActivities();
+                this.isActivitySelected = false;
+            }
         }
     }
 };
@@ -111,10 +133,10 @@ export default {
     position: absolute;
     top: 0;
     width: 100%;
-    height: 20%;
+    height: 15%;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .search-bar {
@@ -157,6 +179,10 @@ export default {
 #catalog.shown {
     height: 50%;
     overflow-y: auto;
+}
+
+#catalog.shown.squeeze {
+    height: 35%;
 }
 
 #catalog.hidden {
