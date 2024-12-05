@@ -22,7 +22,7 @@
         </div>
         <div class="stats">
             <div class="stat-item">
-                <h4>{{ (activities) ? activities.length : 0 }}</h4>
+                <h4>{{ nbActivities }}</h4>
                 <p>Activités</p>
             </div>
             <div class="stat-item">
@@ -62,14 +62,13 @@ export default {
     setup(props) {
 
         const user = ref(null);
-        const activities = ref(null);
+        const nbActivities = ref(0);
 
         const fetchUserData = async (userId) => {
             try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/user/${userId}`);
                 if (response.status === 200) {
                     user.value = response.data;
-                    console.log(user);
                 } else {
                     console.log("Erreur lors de la récupération de l'utilisateur");
                 }
@@ -78,17 +77,11 @@ export default {
             }
 
             try {
-                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity`, {
-                    headers: {
-                        'user-id': userId
-                    }
-                });
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/count/${userId}`);
                 if (response.status === 200) {
-                    activities.value = response.data;
-                    console.log(activities);
-                    localStorage.setItem('activities', JSON.stringify(activities.value));
+                    nbActivities.value = response.data.activityCount;
                 } else {
-                    console.log("Erreur lors de la récupération des activités de l'utilisateur");
+                    console.log("Erreur lors de la récupération des activités animées par l'utilisateur");
                 }
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
@@ -108,7 +101,7 @@ export default {
 
         return {
             user,
-            activities
+            nbActivities
         };
     },
     methods: {
