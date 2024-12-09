@@ -2,9 +2,12 @@
     <v-card @click="clickCard">
         <i @click="updateFavorites($event)" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
         <img :src="srcImage" alt="">
+        <div>
+
+        </div>
         <div class="infos">
             <h1>{{ activity.title }}</h1>
-            <h2>{{ activity.place }}</h2>
+            <h2>{{ activity.placeName }}<br>({{ activity.distanceFromUser }})</h2>
             <h3>{{ activity.startTime + " - " + activity.endTime }}</h3>
         </div>
     </v-card>

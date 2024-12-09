@@ -6,8 +6,7 @@
 
 <script>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { config, Map, MapStyle, Marker } from '@maptiler/sdk';
-import { geocoding } from '@maptiler/client';
+import { config, Map, MapStyle, GeolocationType, Marker } from '@maptiler/sdk';
 import '@maptiler/sdk/dist/maptiler-sdk.css';
 
 export default {
@@ -24,9 +23,9 @@ export default {
         const markers = ref([]);
         const isMarkerClicked = ref(false);
 
-        const clickOnMarker = (coord, activity) => {
+        const clickOnMarker = (activity) => {
             map.value.flyTo({
-                center: ([coord[0], coord[1] - .02]),
+                center: ([activity.coordinates.lng, activity.coordinates.lat - .02]),
                 zoom: 11,
                 duration: 1000,
                 essential: true
@@ -35,72 +34,40 @@ export default {
             isMarkerClicked.value = true;
         };
 
-        const addMarker = (coord, activity) => {
+        const addMarker = (activity) => {
             const marker = new Marker({ color: "#3c4798" })
-                .setLngLat([coord[0], coord[1]])
+                .setLngLat([activity.coordinates.lng, activity.coordinates.lat])
                 .addTo(map.value);
 
-            marker.addClassName("[" + coord.toString() + "]");
+            marker.activity = activity;
 
             marker.getElement().addEventListener('click', () => {
-                const classList = marker.getElement().classList;
-                let coordString = '';
-                
-                for (let className of classList) {
-                    if (className.startsWith('[') && className.endsWith(']')) {
-                        coordString = className.slice(1, -1);
-                        break;
-                    }
-                }
-
-                if (coordString) {
-                    const coordArray = coordString.split(',').map(Number);
-                    clickOnMarker(coordArray, activity);
+                if (marker.activity) {
+                    clickOnMarker(activity);
                 }
             });
 
             markers.value.push(marker);
         };
 
-        const updateMarkers = async () => {
+        const updateMarkers = () => {
             markers.value.forEach(marker => marker.remove());
             markers.value = [];
 
             if (props.activities && props.activities.length > 0) {
                 props.activities.forEach((activity) => {
-                    (async () => {
-                        try {
-                            const result = await geocoding.forward(activity.location);
-                            // console.log(result);
-                            const coord = result.features[0]?.center;
-                            // console.log(coord);
-                            if (coord && coord.length === 2) {
-                                addMarker(coord, activity);
-                            }
-                        } catch (error) {
-                            console.error('Erreur de géocodage :', error);
-                        }
-                    })();
+                    addMarker(activity);
                 });
             }
         };
 
         const centerOnActivity = (activity) => {
-            if (activity && activity.location) {
-                geocoding.forward(activity.location).then((result) => {
-                    const coord = result.features[0]?.center;
-                    if (coord && coord.length === 2) {
-                        map.value.flyTo({
-                            center: ([coord[0], coord[1] - .02]),
-                            zoom: 11,
-                            duration: 1000,
-                            essential: true
-                        });
-                    }
-                }).catch((error) => {
-                    console.error('Erreur de géocodage pour centrer la carte :', error);
-                });
-            }
+            map.value.flyTo({
+                center: ([activity.coordinates.lng, activity.coordinates.lat - .02]),
+                zoom: 11,
+                duration: 1000,
+                essential: true
+            });
         };
 
         watch(() => props.activities, () => {
@@ -113,7 +80,7 @@ export default {
             map.value = new Map({
                 container: mapContainer.value,
                 style: MapStyle.STREETS,
-                geolocate: true,
+                geolocate: GeolocationType.POINT,
                 navigationControl: false
             });
 
@@ -124,27 +91,6 @@ export default {
                     isMarkerClicked.value = false;
                 }
             });
-
-            const centerOnUserLocation = () => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        const { latitude, longitude } = position.coords;
-                        
-                        map.value.flyTo({
-                            center: [longitude, latitude],
-                            zoom: 11,
-                            duration: 1000,
-                            essential: true
-                        });
-                    }, (error) => {
-                        console.error("Erreur de géolocalisation :", error);
-                    });
-                } else {
-                    console.error("La géolocalisation n'est pas supportée par ce navigateur.");
-                }
-            };
-
-            centerOnUserLocation();
 
             updateMarkers();
         });

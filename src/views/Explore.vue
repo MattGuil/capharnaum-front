@@ -36,6 +36,8 @@ export default {
         catalog
     },
     setup() {
+
+        const userLocation = ref(null);
         
         let searchVal = ref('');
 
@@ -48,12 +50,85 @@ export default {
 
         const map = ref(null);
 
+        const getUserLocation = () => {
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+                            resolve(location);
+                        },
+                        (error) => {
+                            console.error("Erreur de géolocalisation : ", error);
+                            reject(error);
+                        }
+                    );
+                } else {
+                    const error = new Error("La géolocalisation n'est pas supportée par ce navigateur.");
+                    console.error(error.message);
+                    reject(error);
+                }
+            });
+        };
+
+
+        const calculateDistanceBetween = async (origin, destination) => {
+
+            if (!origin || !destination) {
+                return null;
+            }
+            
+            const originFormatted = 
+                origin instanceof google.maps.LatLng 
+                    ? origin 
+                    : new google.maps.LatLng(origin.lat, origin.lng);
+            
+            const destinationFormatted = 
+                destination instanceof google.maps.LatLng 
+                    ? destination 
+                    : new google.maps.LatLng(destination.lat, destination.lng);
+
+            return new Promise((resolve, reject) => {
+                new google.maps.DistanceMatrixService().getDistanceMatrix(
+                    {
+                        origins: [originFormatted],
+                        destinations: [destinationFormatted],
+                        travelMode: 'DRIVING',
+                    },
+                    (response, status) => {
+                        if (status === 'OK') {
+                            const distance = response.rows[0].elements[0].distance.text;
+                            const duration = response.rows[0].elements[0].duration.text;
+                            console.log('Distance:', distance, 'Duration:', duration);
+                            resolve({ distance, duration });
+                        } else {
+                            console.error('Erreur lors du calcul de la distance : ', status);
+                            reject(status);
+                        }
+                    }
+                );
+            });
+        };
+
+
         onMounted(async () => {
+
+            userLocation.value = await getUserLocation();
+
             try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity`);
                 
                 if (response.status === 200) {
                     activities.value = response.data;
+                    
+                    const distancePromises = activities.value.map(async (activity) => {
+                        const { distance, duration } = await calculateDistanceBetween(userLocation.value, activity.coordinates);
+                        activity.distanceFromUser = distance;
+                        activity.durationFromUser = duration;
+                    });
+
+                    await Promise.all(distancePromises);
+                    
                     filteredActivitiesMap.value = activities.value;
                     filteredActivitiesCatalog.value = activities.value;
                 } else {

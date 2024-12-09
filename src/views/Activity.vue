@@ -6,11 +6,11 @@
             <i @click="updateFavorites()" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
 
             <h1 v-if="activity">{{ activity.title }}</h1>
-            <h2 v-if="activity" class="event-title">{{ activity.place }}</h2>
+            <h2 v-if="activity" class="event-title">{{ activity.placeName }}</h2>
             
             <div class="event-details">
                 <div class="event-info">
-                    <p v-if="activity">📍 {{ activity.location }}</p>
+                    <p v-if="activity">📍 {{ activity.address }}</p>
                     <p v-if="activity">⏰ {{ activity.startTime + ' - ' + activity.endTime }}</p>
                 </div>
 
