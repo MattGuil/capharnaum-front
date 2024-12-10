@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
 
@@ -60,6 +61,8 @@ export default {
         }
     },
     setup(props) {
+
+        const store = useStore();
 
         const user = ref(null);
         const nbActivities = ref(0);
@@ -100,6 +103,7 @@ export default {
         );
 
         return {
+            store,
             user,
             nbActivities
         };
@@ -120,7 +124,7 @@ export default {
                 .then(res => {
                     console.log(res.status);
                     if (res.status === 200) {
-                        localStorage.removeItem('userId');
+                        this.store.resetStore();
                         this.$router.push('/login');
                     };
                 });
@@ -131,7 +135,7 @@ export default {
     },
     computed: {
         itsMe() {
-            return this.id == localStorage.getItem('userId');
+            return this.id == this.store.userId;
         }
     }
 

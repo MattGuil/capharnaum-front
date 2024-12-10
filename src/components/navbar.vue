@@ -13,8 +13,15 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
+
 export default {
     name: 'navbar',
+    setup() {
+        const store = useStore();
+
+        return { store };
+    },
     methods: {
         navigateToExplore() {
             this.$router.push('/explore');
@@ -23,7 +30,7 @@ export default {
             this.$router.push('/create/activity');
         },
         navigateToProfile() {
-            this.$router.push(`/profile/${localStorage.getItem('userId')}`);
+            this.$router.push(`/profile/${this.store.userId}`);
         },
     },
 }

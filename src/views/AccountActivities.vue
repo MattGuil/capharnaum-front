@@ -6,17 +6,21 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, onMounted, onUnmounted } from 'vue';
 
 export default {
     name: 'AccountActivities',
     setup() {
+
+        const store = useStore();
+
         const activities = ref([]);
 
         onMounted(async () => {
             try {
-                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/user/${localStorage.getItem('userId')}`);
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/user/${store.userId}`);
                 if (response.status === 200) {
                     activities.value = response.data;
                 } else {

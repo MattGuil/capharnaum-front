@@ -46,6 +46,7 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -54,6 +55,7 @@ export default {
     name: 'Login',
     setup() {
 
+        const store = useStore();
         const email = ref('');
         const password = ref('');
         const errorMessage = ref('');
@@ -70,7 +72,7 @@ export default {
                 });
 
                 if (response.status === 200) {
-                    localStorage.setItem('userId', response.data.userId);
+                    store.updateUserId(response.data.userId);
                     router.push('/explore');
                 } else if (response.status === 201) {
                     errorMessage.value = response.data;

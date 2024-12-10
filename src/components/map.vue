@@ -71,6 +71,7 @@ export default {
         };
 
         watch(() => props.activities, () => {
+            console.log('ACTIVITIES CHANGED !');
             updateMarkers();
         });
 

@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
@@ -69,6 +70,9 @@ export default {
         }
     },
     setup(props) {
+
+        const store = useStore();
+
         const activity = ref(null);
         const srcImage = ref('');
         const isFav = ref(false);
@@ -107,7 +111,7 @@ export default {
 
             try {
                 const response = await axios.get(
-                    `${import.meta.env.APP_API_URL}/favorite/check/${localStorage.getItem('userId')}/${activity.value._id}`
+                    `${import.meta.env.APP_API_URL}/favorite/check/${store.userId}/${activity.value._id}`
                 );
                 
                 if (response.status === 200) {
@@ -124,7 +128,7 @@ export default {
             showPopup.value = false;
             try {
                 const response = await axios.post(`${import.meta.env.APP_API_URL}/participation`, {
-                    user: localStorage.getItem('userId'),
+                    user: store.userId,
                     activity: activity.value._id
                 });
                 if (response.status === 201) {
@@ -158,6 +162,7 @@ export default {
         };
 
         return {
+            store,
             activity,
             srcImage,
             isFav,
@@ -177,11 +182,11 @@ export default {
 
                 if (this.isFav) {
                     response = await axios.delete(
-                        `${import.meta.env.APP_API_URL}/favorite/${localStorage.getItem('userId')}/${this.activity._id}`
+                        `${import.meta.env.APP_API_URL}/favorite/${this.store.userId}/${this.activity._id}`
                     );
                 } else {
                     response = await axios.post(`${import.meta.env.APP_API_URL}/favorite`, {
-                        user: localStorage.getItem('userId'),
+                        user: this.store.userId,
                         activity: this.activity._id
                     });
                 }

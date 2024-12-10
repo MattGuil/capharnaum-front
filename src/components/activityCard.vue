@@ -7,13 +7,14 @@
         </div>
         <div class="infos">
             <h1>{{ activity.title }}</h1>
-            <h2>{{ activity.placeName }}<br>({{ activity.distanceFromUser }})</h2>
+            <h2>{{ activity.placeName }}<br>({{ store.getDistanceFor(activity._id).distance }})</h2>
             <h3>{{ activity.startTime + " - " + activity.endTime }}</h3>
         </div>
     </v-card>
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, watch, onMounted } from 'vue';
 
@@ -25,6 +26,9 @@ export default {
         }
     },
     setup(props) {
+
+        const store = useStore();
+
         const srcImage = ref('');
         const isFav = ref(false);
         
@@ -43,7 +47,7 @@ export default {
 
             try {
                 const response = await axios.get(
-                    `${import.meta.env.APP_API_URL}/favorite/check/${localStorage.getItem('userId')}/${props.activity._id}`
+                    `${import.meta.env.APP_API_URL}/favorite/check/${store.userId}/${props.activity._id}`
                 );
                 
                 if (response.status === 200) {
@@ -61,7 +65,7 @@ export default {
             srcImage.value = loadImage();
         });
         
-        return { srcImage, isFav };
+        return { store, srcImage, isFav };
     },
     methods: {
         clickCard() {
@@ -76,11 +80,11 @@ export default {
 
                 if (this.isFav) {
                     response = await axios.delete(
-                        `${import.meta.env.APP_API_URL}/favorite/${localStorage.getItem('userId')}/${this.activity._id}`
+                        `${import.meta.env.APP_API_URL}/favorite/${this.store.userId}/${this.activity._id}`
                     );
                 } else {
                     response = await axios.post(`${import.meta.env.APP_API_URL}/favorite`, {
-                        user: localStorage.getItem('userId'),
+                        user: this.store.userId,
                         activity: this.activity._id
                     });
                 }

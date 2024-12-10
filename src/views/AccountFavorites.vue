@@ -14,11 +14,15 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, onMounted } from 'vue';
 
 export default {
 	setup() {
+
+		const store = useStore();
+
 		const favorites = ref([]);
 		
 		const loadImage = (discipline) => {
@@ -33,7 +37,7 @@ export default {
 
 		onMounted(async () => {
 			try {
-				const response = await axios.get(`${import.meta.env.APP_API_URL}/favorite/user/${localStorage.getItem('userId')}`);
+				const response = await axios.get(`${import.meta.env.APP_API_URL}/favorite/user/${store.userId}`);
 
 				if (response.status === 200) {
 					response.data.forEach(elem => {

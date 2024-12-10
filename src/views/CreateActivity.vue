@@ -139,6 +139,7 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import { VNumberInput } from 'vuetify/labs/VNumberInput';
@@ -153,6 +154,9 @@ export default {
         VTimePicker
     },
     setup() {
+
+        const store = useStore();
+
         const disciplines = ['danse', 'dessin', 'théâtre', 'musique', 'photographie'];
         const types = ['ponctuelle', 'regulière'];
         const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
@@ -215,6 +219,7 @@ export default {
         })
 
         return { 
+            store,
             disciplines,
             types,
             days,
@@ -284,7 +289,7 @@ export default {
                             description: this.form.description,
                             price: parseFloat(this.form.price),
                             maxParticipants: this.form.maxParticipants,
-                            owner: localStorage.getItem('userId'),
+                            owner: this.store.userId
                         };
 
                         try {
