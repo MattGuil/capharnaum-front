@@ -24,10 +24,11 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
 import maptiler from '../components/map.vue';
 import catalog from '../components/catalog.vue';
 import axios from 'axios';
+import { useActivityStore } from '../stores/activityStore';
 
 export default {
     name: 'Explore',
@@ -37,17 +38,13 @@ export default {
     },
     setup() {
 
+        const activityStore = useActivityStore();
         const userLocation = ref(null);
-        
-        let searchVal = ref('');
-
-        const activities = ref(null);
+        const searchVal = ref('');
         const filteredActivitiesMap = ref(null);
         const filteredActivitiesCatalog = ref(null);
-
         const showCatalog = ref(false);
         const isActivitySelected = ref(false);
-
         const map = ref(null);
 
         const getUserLocation = () => {
@@ -110,45 +107,33 @@ export default {
             });
         };
 
+        const loadActivities = async () => {
+            const newActivities = await activityStore.refreshActivities();
 
-        onMounted(async () => {
-
-            userLocation.value = await getUserLocation();
-
-            try {
-                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity`);
-                
-                if (response.status === 200) {
-                    activities.value = response.data;
-                    
-                    const distancePromises = activities.value.map(async (activity) => {
-                        const { distance, duration } = await calculateDistanceBetween(userLocation.value, activity.coordinates);
-                        activity.distanceFromUser = distance;
-                        activity.durationFromUser = duration;
-                    });
-
-                    await Promise.all(distancePromises);
-                    
-                    filteredActivitiesMap.value = activities.value;
-                    filteredActivitiesCatalog.value = activities.value;
-                } else {
-                    console.log("Erreur lors de la récupération des activités");
+            const distancePromises = activityStore.activities.map(async (activity) => {
+                if (!activity.distanceFromUser || newActivities.includes(activity)) {
+                    const { distance, duration } = await calculateDistanceBetween(userLocation.value, activity.coordinates);
+                    activity.distanceFromUser = distance;
+                    activity.durationFromUser = duration;
                 }
-            } catch (error) {
-                console.error("Erreur de connexion ou autre :", error);
-            }
-        });
+            });
+
+            await Promise.all(distancePromises);
+
+            filteredActivitiesMap.value = activityStore.activities;
+            filteredActivitiesCatalog.value = activityStore.activities;
+        };
 
         const filterActivities = () => {
             if (!searchVal.value) {
                 showCatalog.value = false;
-                filteredActivitiesMap.value = activities.value;
-                filteredActivitiesCatalog.value = activities.value;
+                filteredActivitiesMap.value = activityStore.activities;
+                filteredActivitiesCatalog.value = activityStore.activities;
             } else {
-                filteredActivitiesMap.value = activities.value.filter(activity =>
+                filteredActivitiesMap.value = activityStore.activities.filter(activity =>
                     activity.title.toLowerCase().includes(searchVal.value.toLowerCase())
                 );
-                filteredActivitiesCatalog.value = activities.value.filter(activity =>
+                filteredActivitiesCatalog.value = activityStore.activities.filter(activity =>
                     activity.title.toLowerCase().includes(searchVal.value.toLowerCase())
                 );
                 showCatalog.value = true;
@@ -160,15 +145,24 @@ export default {
             }
         };
 
+        onMounted(async () => {
+            userLocation.value = await getUserLocation();
+            await loadActivities();
+        });
+
+        onUnmounted(() => {
+            console.log(activityStore.activities);
+        });
+
         watch(searchVal, () => {
             if (!searchVal.value) filterActivities();
         });
 
         return { 
-            activities,
             searchVal,
             showCatalog,
             isActivitySelected,
+            activityStore,
             filteredActivitiesMap,
             filteredActivitiesCatalog, 
             filterActivities,
@@ -180,7 +174,8 @@ export default {
             this.showCatalog = !this.showCatalog;
         },
         filterActivitiesCatalog(activitySelected) {
-            this.filteredActivitiesCatalog = this.activities.filter(activity =>
+            const activities = this.activityStore.activities;
+            this.filteredActivitiesCatalog = activities.filter(activity =>
                 activity._id == activitySelected._id
             );
             this.showCatalog = true;
