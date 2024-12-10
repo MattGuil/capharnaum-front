@@ -25,7 +25,7 @@ export default {
 
         const clickOnMarker = (activity) => {
             map.value.flyTo({
-                center: ([activity.coordinates.lng, activity.coordinates.lat - .02]),
+                center: activity.coordinates,
                 zoom: 11,
                 duration: 1000,
                 essential: true
@@ -63,7 +63,7 @@ export default {
 
         const centerOnActivity = (activity) => {
             map.value.flyTo({
-                center: ([activity.coordinates.lng, activity.coordinates.lat - .02]),
+                center: activity.coordinates,
                 zoom: 11,
                 duration: 1000,
                 essential: true

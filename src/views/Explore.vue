@@ -13,6 +13,17 @@
                 <input type="text" placeholder="Recherche..." class="search-input" v-model="searchVal" />
                 <v-icon class="search-icon" @click="filterActivities">mdi-magnify</v-icon>
             </div>
+            <div class="chips">
+                <v-chip
+                    v-for="(filter, index) in formattedFilters"
+                    :key="index"
+                    closable
+                    :prepend-icon="filter.icon"
+                    color="#3c4798"
+                >
+                    {{ filter.text }}
+                </v-chip>
+            </div>
         </div>
         <catalog 
             :class="{ shown: showCatalog, hidden: !showCatalog, squeeze: (filteredActivitiesCatalog && filteredActivitiesCatalog.length == 1) }" 
@@ -24,10 +35,9 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
 import maptiler from '../components/map.vue';
 import catalog from '../components/catalog.vue';
-import axios from 'axios';
 import { useActivityStore } from '../stores/activityStore';
 
 export default {
@@ -46,6 +56,91 @@ export default {
         const showCatalog = ref(false);
         const isActivitySelected = ref(false);
         const map = ref(null);
+
+        const advancedFilters = ref({
+            disciplines: [
+                "danse",
+                "théâtre"
+            ],
+            type: "ponctuelle",
+            prix: {
+                min: 0,
+                max: 10
+            },
+            days: [
+                "lundi",
+                "mercredi"
+            ],
+            dateRange: {
+                start: "14/12/2024",
+                end: "18/12/2024"
+            },
+            timeRange: {
+                start: "10:00",
+                end: "18:00"
+            }
+        });
+
+        const formattedFilters = computed(() => {
+            const filters = [];
+
+            if (advancedFilters.value.disciplines.length > 0) {
+                advancedFilters.value.disciplines.forEach((discipline) => {
+                    filters.push({
+                        icon: null,
+                        text: discipline,
+                    });
+                });
+            }
+
+            if (advancedFilters.value.type) {
+                filters.push({
+                    icon:
+                        advancedFilters.value.type === "ponctuelle"
+                        ? "mdi-pin"
+                        : "mdi-refresh",
+                    text: advancedFilters.value.type,
+                });
+            }
+
+            if (advancedFilters.value.prix) {
+                    const { min, max } = advancedFilters.value.prix;
+                    const prixText = min === 0 && max === 0 ? "Gratuit" : `${min} - ${max}`;
+                    filters.push({
+                        icon: "mdi-currency-eur",
+                        text: prixText,
+                });
+            }
+
+            if (advancedFilters.value.days.length > 0) {
+                advancedFilters.value.days.forEach((day) => {
+                    filters.push({
+                        icon: "mdi-calendar-blank",
+                        text: day,
+                    });
+                });
+            }
+
+            if (advancedFilters.value.dateRange) {
+                const { start, end } = advancedFilters.value.dateRange;
+                const dateText = start === end ? start : `${start} - ${end}`;
+                filters.push({
+                    icon: "mdi-calendar-blank",
+                    text: dateText,
+                });
+            }
+
+            if (advancedFilters.value.timeRange) {
+                const { start, end } = advancedFilters.value.timeRange;
+                const timeText = start === end ? start : `${start} - ${end}`;
+                filters.push({
+                    icon: "mdi-clock-time-four",
+                    text: timeText,
+                });
+            }
+
+            return filters;
+        });
 
         const getUserLocation = () => {
             return new Promise((resolve, reject) => {
@@ -158,7 +253,9 @@ export default {
             if (!searchVal.value) filterActivities();
         });
 
-        return { 
+        return {
+            advancedFilters,
+            formattedFilters,
             searchVal,
             showCatalog,
             isActivitySelected,
@@ -201,12 +298,11 @@ export default {
 
 .search-bar-container {
     position: absolute;
-    top: 0;
+    top: 10%;
     width: 100%;
-    height: 15%;
     display: flex;
-    justify-content: center;
-    align-items: flex-end;
+    flex-direction: column;
+    align-items: center;
 }
 
 .search-bar {
@@ -220,6 +316,25 @@ export default {
     padding: 8px;
     max-width: 400px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chips {
+    width: 100%;
+    padding: 0 5%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 5px;
+    overflow-x: auto;
+    white-space: nowrap;
+    cursor: grab;
+    scrollbar-width: none;
+}
+
+.v-chip {
+    background-color: #3c4798 !important;
+    color: white !important;
+    flex-shrink: 0;
 }
 
 .search-input {
