@@ -37,7 +37,7 @@
 
 <script>
 import { useStore } from '../stores/store';
-import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
+import { ref, onBeforeMount, onMounted, watch, computed } from 'vue';
 import maptiler from '../components/map.vue';
 import catalog from '../components/catalog.vue';
 import { debounce } from 'lodash-es';
@@ -59,93 +59,81 @@ export default {
         const isActivitySelected = ref(false);
         const map = ref(null);
 
-        const advancedFilters = ref({
-            disciplines: [
-                "danse"
-            ]
-        });
+        const advancedFilters = ref();
+
+        const filterConfigs = [
+            {
+                key: "disciplines",
+                icon: null,
+                formatter: (value) => value,
+                remover: (value, filter) => value.filter((item) => item !== filter.text),
+            },
+            {
+                key: "type",
+                icon: (value) => (value === "ponctuelle" ? "mdi-pin" : "mdi-refresh"),
+                formatter: (value) => value,
+                remover: () => undefined,
+            },
+            {
+                key: "prix",
+                icon: "mdi-currency-eur",
+                formatter: ({ min, max }) => (min === 0 && max === 0 ? "gratuit" : `${min} - ${max}`),
+                remover: () => undefined,
+            },
+            {
+                key: "days",
+                icon: "mdi-calendar-blank",
+                formatter: (value) => value,
+                remover: (value, filter) => value.filter((day) => day !== filter.text),
+            },
+            {
+                key: "dateRange",
+                icon: "mdi-calendar-blank",
+                formatter: ({ start, end }) => (start === end ? start : `${start} - ${end}`),
+                remover: () => undefined,
+            },
+            {
+                key: "timeRange",
+                icon: "mdi-clock-time-four",
+                formatter: ({ start, end }) => (start === end ? start : `${start} - ${end}`),
+                remover: () => undefined,
+            },
+        ];
 
         const formattedFilters = computed(() => {
-            const filters = [];
+            return filterConfigs.flatMap(({ key, icon, formatter }) => {
+                const value = advancedFilters.value[key];
+                if (!value || (Array.isArray(value) && value.length === 0)) return [];
 
-            if (advancedFilters.value.disciplines && advancedFilters.value.disciplines.length > 0) {
-                advancedFilters.value.disciplines.forEach((discipline) => {
-                    filters.push({
-                        icon: null,
-                        text: discipline,
-                    });
-                });
-            }
-
-            if (advancedFilters.value.type) {
-                filters.push({
-                    icon:
-                        advancedFilters.value.type === "ponctuelle"
-                        ? "mdi-pin"
-                        : "mdi-refresh",
-                    text: advancedFilters.value.type,
-                });
-            }
-
-            if (advancedFilters.value.prix) {
-                    const { min, max } = advancedFilters.value.prix;
-                    const prixText = min === 0 && max === 0 ? "gratuit" : `${min} - ${max}`;
-                    filters.push({
-                        icon: "mdi-currency-eur",
-                        text: prixText,
-                });
-            }
-
-            if (advancedFilters.value.days && advancedFilters.value.days.length > 0) {
-                advancedFilters.value.days.forEach((day) => {
-                    filters.push({
-                        icon: "mdi-calendar-blank",
-                        text: day,
-                    });
-                });
-            }
-
-            if (advancedFilters.value.dateRange) {
-                const { start, end } = advancedFilters.value.dateRange;
-                const dateText = start === end ? start : `${start} - ${end}`;
-                filters.push({
-                    icon: "mdi-calendar-blank",
-                    text: dateText,
-                });
-            }
-
-            if (advancedFilters.value.timeRange) {
-                const { start, end } = advancedFilters.value.timeRange;
-                const timeText = start === end ? start : `${start} - ${end}`;
-                filters.push({
-                    icon: "mdi-clock-time-four",
-                    text: timeText,
-                });
-            }
-
-            return filters;
+                if (Array.isArray(value)) {
+                    return value.map((item) => ({
+                        icon: typeof icon === "function" ? icon(item) : icon,
+                        text: formatter(item),
+                        key,
+                    }));
+                } else {
+                    return [
+                        {
+                        icon: typeof icon === "function" ? icon(value) : icon,
+                        text: formatter(value),
+                        key,
+                        },
+                    ];
+                }
+            });
         });
 
         const removeFilter = (filter) => {
 
-            if (advancedFilters.value.disciplines.includes(filter.text)) {
-                advancedFilters.value.disciplines = advancedFilters.value.disciplines.filter(
-                    (discipline) => discipline !== filter.text
-                );
-            } else if (filter.text === "ponctuelle" || filter.text === "regulière") {
-                advancedFilters.value.type = null;
-            } else if (filter.text.includes(" - ")) {
-                if (filter.icon === "mdi-currency-eur") {
-                    advancedFilters.value.prix = { min: null, max: null };
-                } else if (filter.icon === "mdi-calendar-blank") {
-                    advancedFilters.value.dateRange = { start: null, end: null };
-                } else if (filter.icon === "mdi-clock-time-four") {
-                    advancedFilters.value.timeRange = { start: null, end: null };
-                }
-            } else if (advancedFilters.value.days.includes(filter.text)) {
-                advancedFilters.value.days = advancedFilters.value.days.filter(
-                    (day) => day !== filter.text
-                );
+            const config = filterConfigs.find(({ key }) => key === filter.key);
+            if (!config) return;
+
+            const value = advancedFilters.value[filter.key];
+            const newValue = config.remover(value, filter);
+            if (newValue === undefined) {
+                delete advancedFilters.value[filter.key];
+            } else {
+                advancedFilters.value[filter.key] = newValue;
             }
         };
 
@@ -216,6 +204,8 @@ export default {
 
         const loadActivities = async () => {
 
+            console.log("LOADING ACTIVITIES...");
+
             const currentLocation = userLocation.value;
             if (
                 !store.lastUserLocation ||
@@ -226,9 +216,7 @@ export default {
                 store.updateUserLocation(currentLocation);
             }
 
-            const newActivities = await store.refreshActivities(advancedFilters.value);
-
-            console.log(advancedFilters.value);
+            const newActivities = await store.refreshActivities();
 
             const distancePromises = store.activities.map(async (activity) => {
                 if (!store.distanceCache[activity._id] || newActivities.includes(activity)) {
@@ -244,6 +232,8 @@ export default {
 
             filteredActivitiesMap.value = store.activities;
             filteredActivitiesCatalog.value = store.activities;
+
+            console.log("ACTIVITIES LOADED.");
         };
 
         const filterActivities = () => {
@@ -267,20 +257,26 @@ export default {
             }
         };
 
+        onBeforeMount(() => {
+            if (store.advancedFilters) {
+                advancedFilters.value = { ...store.advancedFilters };
+            }
+        });
+
         onMounted(async () => {
             userLocation.value = await getUserLocation();
             await loadActivities();
-        });
-
-        onUnmounted(() => {
-            console.log(store.activities);
         });
 
         const debouncedLoadActivities = debounce(async () => {
             await loadActivities();
         }, 300);
 
-        watch(advancedFilters.value, () => {
+        watch(
+            () => advancedFilters.value,
+            (newFilters) => {
+                store.updateAdvancedFilters(newFilters);
+                console.log("ADVANCED FILTERS UPDATED IN THE STORE.");
                 debouncedLoadActivities();
             },
             { deep: true }

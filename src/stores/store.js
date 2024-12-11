@@ -5,6 +5,16 @@ export const useStore = defineStore('store', {
     state: () => ({
         userId: null,
         lastUserLocation: null,
+        advancedFilters: {
+            disciplines: [
+                "danse"
+            ],
+            prix: {
+                min: 0,
+                max: 0
+            },
+            type: "ponctuelle",
+        },
         activities: [],
         distanceCache: {},
     }),
@@ -23,6 +33,9 @@ export const useStore = defineStore('store', {
         updateUserLocation(newLocation) {
             this.lastUserLocation = newLocation;
         },
+        updateAdvancedFilters(advancedFilters) {
+            this.advancedFilters = advancedFilters;
+        },
         async fetchActivitiesFromAPI(advancedFilters) {
             try {
                 const response = await axios.post(`${import.meta.env.APP_API_URL}/activity/filter`, advancedFilters);
@@ -37,8 +50,8 @@ export const useStore = defineStore('store', {
                 return [];
             }
         },
-        async refreshActivities(advancedFilters = {}) {
-            const apiActivities = await this.fetchActivitiesFromAPI(advancedFilters);
+        async refreshActivities() {
+            const apiActivities = await this.fetchActivitiesFromAPI(this.advancedFilters);
 
             // const newActivities = apiActivities.filter(activity => !this.activityIds.includes(activity._id));
             // this.activities.push(...apiActivities);

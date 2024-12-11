@@ -71,8 +71,8 @@ export default {
         };
 
         watch(() => props.activities, () => {
-            console.log('ACTIVITIES CHANGED !');
             updateMarkers();
+            console.log('MARKERS UPDATED.');
         });
 
         onMounted(async () => {
