@@ -22,7 +22,7 @@
         </div>
         <div class="stats">
             <div class="stat-item">
-                <h4>{{ (activities) ? activities.length : 0 }}</h4>
+                <h4>{{ nbActivities }}</h4>
                 <p>Activités</p>
             </div>
             <div class="stat-item">
@@ -78,6 +78,7 @@
 </template>
 
 <script>
+import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
 
@@ -90,8 +91,12 @@ export default {
         }
     },
     setup(props) {
+
+        const store = useStore();
+
         const user = ref(null);
-        const activities = ref(null);
+        const nbActivities = ref(0);
+
         const activeTab = ref(0); // Onglet actif
         const tabs = ref(["Animé", "Inscrit", "Favoris"]); // Noms des onglets
 
@@ -127,16 +132,11 @@ export default {
             }
 
             try {
-                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity`, {
-                    headers: {
-                        'user-id': userId
-                    }
-                });
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/count/${userId}`);
                 if (response.status === 200) {
-                    activities.value = response.data;
-                    localStorage.setItem('activities', JSON.stringify(activities.value));
+                    nbActivities.value = response.data.activityCount;
                 } else {
-                    console.log("Erreur lors de la récupération des activités de l'utilisateur");
+                    console.log("Erreur lors de la récupération des activités animées par l'utilisateur");
                 }
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
@@ -145,7 +145,7 @@ export default {
 
         const setActiveTab = (index) => {
             console.log('Tab changé :', index);  // Debug
-             activeTab.value = index;
+            activeTab.value = index;
         };
 
         onMounted(() => {
@@ -160,8 +160,9 @@ export default {
         );
 
         return {
+            store,
             user,
-            activities,
+            nbActivities,
             activeTab,
             tabs,
             setActiveTab,
@@ -178,10 +179,11 @@ export default {
             try {
                 axios.get(`${import.meta.env.APP_API_URL}/user/logout`, { withCredentials: true })
                 .then(res => {
+                    console.log(res.status);
                     if (res.status === 200) {
-                        localStorage.removeItem('userId');
+                        this.store.resetStore();
                         this.$router.push('/login');
-                    }
+                    };
                 });
             } catch (error) {
                 console.log("Erreur lors de la déconnexion.");
@@ -190,7 +192,7 @@ export default {
     },
     computed: {
         itsMe() {
-            return this.id == localStorage.getItem('userId');
+            return this.id == this.store.userId;
         }
     }
 };
