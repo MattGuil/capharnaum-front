@@ -10,7 +10,6 @@
                 v-for="activity in activities" 
                 :key="activity.id" 
                 :activity="activity"
-                @fav-updated="updateFav"
             />
         </div>
     </div>
@@ -28,11 +27,6 @@ export default {
         activities: {
             type: Array,
             required: true
-        }
-    },
-    methods: {
-        updateFav() {
-            this.$emit('fav-updated');
         }
     }
 }

@@ -10,29 +10,9 @@
                 <h3 v-if="user">{{ user.prenom + " " + user.nom }}</h3>
                 <p v-if="user" class="bio">{{ user.bio }}</p>
             </div>
-            <div v-if="!itsMe" class="contacts">
-                <v-icon color="blue-darken-2" icon="mdi-message-text-outline" size="24"></v-icon>
-                <div class="action-buttons">
-                    <v-btn @click="toggleFollow" class="follow-btn">
-                        {{ isFollowed ? 'Following' : 'Follow' }}
-                    </v-btn>
-                </div>
-                <v-icon color="blue-darken-2" icon="mdi-share-variant" size="24"></v-icon>
-            </div>
-        </div>
-        <div class="stats">
-            <div class="stat-item">
-                <h4>{{ nbActivities }}</h4>
-                <p>Activités</p>
-            </div>
-            <div class="stat-item">
-                <h4>{{ 0 }}</h4>
-                <p>Followers</p>
-            </div>
-            <div class="stat-item">
-                <h4>{{ 0 }}</h4>
-                <p>Following</p>
-            </div>
+            <v-btn v-if="!itsMe" color="#3c4798">
+                Envoyer un message
+            </v-btn>
         </div>
         <div v-if="user && user.interests.length > 0" class="interests">
             <h4>Centres d’intérêt</h4>
@@ -40,50 +20,81 @@
                 <div v-for="interest in user.interests" :key="interest" class="interest-card"></div>
             </div>
         </div>
-        <div v-if="itsMe" class="tab-buttons">
-            <button 
-                v-for="(tab, index) in tabs" 
-                :key="index" 
-                :class="['tab-button', { active: activeTab === index }]" 
-                @click="setActiveTab(index)">
-                {{ tab }}
-            </button>
-        </div>
-        <div class="tab-content">
-            <div v-if="activeTab === 0" class="tab-pane">
-                <h4>Animé</h4>
-                <p>
-                    "Animé" est l'onglet où vous pouvez découvrir des séries d'animation passionnantes. 
-                    Explorez une variété d'animés allant des classiques comme *Naruto* aux dernières sorties. 
-                    Un excellent endroit pour trouver des recommandations et partager vos coups de cœur !
-                </p>
-            </div>
-            <div v-if="activeTab === 1" class="tab-pane">
-                <h4>Inscrit</h4>
-                <p>
-                    L'onglet "Inscrit" est l'endroit où vous pouvez voir tous les événements auxquels vous êtes inscrit. 
-                    Il peut s'agir de conférences, de meetups ou d'ateliers sur des sujets qui vous intéressent. 
-                    Soyez à jour avec vos prochaines participations !
-                </p>
-            </div>
-            <div v-if="activeTab === 2" class="tab-pane">
-                <h4>Favoris</h4>
-                <p>
-                    Dans cet onglet, vous pouvez retrouver tous vos favoris : des articles intéressants, des vidéos inspirantes, 
-                    ou même des blogs que vous aimez consulter régulièrement. C'est votre espace de partage de ressources utiles.
-                </p>
-            </div>
-        </div>
+        <v-card v-if="itsMe" class="mt-10" variant="outlined">
+            <v-tabs
+            v-model="tab"
+            align-tabs="center"
+            bg-color="transparent"
+            stacked
+            >
+                <v-tab value="activities" class="tab-item">
+                    <v-icon icon="mdi-head"></v-icon>
+                    <div class="tab-text">
+                        Activités ({{ activities ? activities.length : 0 }})
+                    </div>
+                </v-tab>
+                <v-tab value="participations" class="tab-item">
+                    <v-icon icon="mdi-note-edit"></v-icon>
+                    <div class="tab-text">
+                        Participations ({{ participations ? participations.length : 0 }})
+                    </div>
+                </v-tab>
+                <v-tab value="favorites" class="tab-item">
+                    <v-icon icon="mdi-heart"></v-icon>
+                    <div class="tab-text">
+                        Favoris ({{ favorites ? favorites.length : 0 }})
+                    </div>
+                </v-tab>
+            </v-tabs>
+
+            <v-card-text>
+                <v-tabs-window v-model="tab">
+                    <v-tabs-window-item value="activities" class="scrollable-container">
+                        <div class="activity-cards-container">
+                            <activityCard 
+                                v-for="activity in activities" 
+                                :key="activity.id" 
+                                :activity="activity"
+                            />
+                        </div>
+                    </v-tabs-window-item>
+
+                    <v-tabs-window-item value="participations" class="scrollable-container">
+                        <div class="activity-cards-container">
+                            <activityCard 
+                                v-for="participation in participations" 
+                                :key="participation.id" 
+                                :activity="participation.activity"
+                            />
+                        </div>
+                    </v-tabs-window-item>
+
+                    <v-tabs-window-item value="favorites" class="scrollable-container">
+                        <div class="activity-cards-container">
+                            <activityCard 
+                                v-for="favorite in favorites" 
+                                :key="favorite.id" 
+                                :activity="favorite.activity"
+                            />
+                        </div>
+                    </v-tabs-window-item>
+                </v-tabs-window>
+            </v-card-text>
+        </v-card>
     </div>
 </template>
 
 <script>
+import activityCard from '../components/activityCard.vue';
 import { useStore } from '../stores/store';
 import axios from 'axios';
 import { ref, onMounted, watch } from 'vue';
 
 export default {
     name: 'Profile',
+    components: {
+        activityCard
+    },
     props: {
         id: {
             type: String,
@@ -93,31 +104,11 @@ export default {
     setup(props) {
 
         const store = useStore();
-
         const user = ref(null);
-        const nbActivities = ref(0);
-
-        const activeTab = ref(0); // Onglet actif
-        const tabs = ref(["Animé", "Inscrit", "Favoris"]); // Noms des onglets
-
-        // Contenu exemple pour chaque onglet
-        const sampleAnimes = ref([
-            { id: 1, title: "Démon Slayer", description: "Combat contre des démons dans un monde fantastique." },
-            { id: 2, title: "One Piece", description: "Luffy et son équipage à la recherche du One Piece." },
-            { id: 3, title: "Naruto", description: "Les aventures d'un ninja courageux." }
-        ]);
-
-        const sampleEvents = ref([
-            { id: 1, name: "Conférence Vue.js", date: "2024-01-15" },
-            { id: 2, name: "Atelier Frontend", date: "2024-02-20" },
-            { id: 3, name: "Meetup JavaScript", date: "2024-03-10" }
-        ]);
-
-        const sampleFavorites = ref([
-            { id: 1, name: "Article Vue.js", details: "Guide complet sur Vue.js 3." },
-            { id: 2, name: "Vidéo Frontend", details: "Tutoriel sur les composants réactifs." },
-            { id: 3, name: "Blog DevOps", details: "Introduction aux outils CI/CD." }
-        ]);
+        const activities = ref(null);
+        const participations = ref(null);
+        const favorites = ref(null);
+        const tab = ref(null);
 
         const fetchUserData = async (userId) => {
             try {
@@ -132,20 +123,37 @@ export default {
             }
 
             try {
-                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/count/${userId}`);
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/user/${userId}`);
                 if (response.status === 200) {
-                    nbActivities.value = response.data.activityCount;
+                    activities.value = response.data;
                 } else {
                     console.log("Erreur lors de la récupération des activités animées par l'utilisateur");
                 }
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
             }
-        };
 
-        const setActiveTab = (index) => {
-            console.log('Tab changé :', index);  // Debug
-            activeTab.value = index;
+            try {
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/participation/user/${userId}`);
+                if (response.status === 200) {
+                    participations.value = response.data;
+                } else {
+                    console.log("Erreur lors de la récupération des activités animées par l'utilisateur");
+                }
+            } catch (error) {
+                console.error("Erreur de connexion ou autre :", error);
+            }
+
+            try {
+				const response = await axios.get(`${import.meta.env.APP_API_URL}/favorite/user/${userId}`);
+				if (response.status === 200) {
+					favorites.value = response.data;
+				} else {
+					console.log("Erreur lors de la récupération des favoris")
+				}
+			} catch (error) {
+				console.error("Erreur de connexion ou autre :", error);
+			}
         };
 
         onMounted(() => {
@@ -162,19 +170,13 @@ export default {
         return {
             store,
             user,
-            nbActivities,
-            activeTab,
-            tabs,
-            setActiveTab,
-            sampleAnimes,
-            sampleEvents,
-            sampleFavorites
+            activities,
+            participations,
+            favorites,
+            tab,
         };
     },
     methods: {
-        toggleFollow() {
-            this.isFollowed = !this.isFollowed;
-        },
         logout() {
             try {
                 axios.get(`${import.meta.env.APP_API_URL}/user/logout`, { withCredentials: true })
@@ -199,6 +201,7 @@ export default {
 </script>
 
 <style scoped>
+
 .btn-logout {
     position: absolute;
     top: 20px;
@@ -208,7 +211,6 @@ export default {
 .profile-card {
     width: 100%;
     height: 80vh;
-    padding: 20px;
     padding-top: 40px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 20px 20px 0 0;
@@ -270,52 +272,6 @@ h1, h3 {
     margin: 5px 0 15px;
 }
 
-.contacts {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.follow-btn {
-    background-color: #3f51b5;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.stats {
-    display: flex;
-    justify-content: space-around;
-}
-
-.stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.stat-item h4 {
-    color: #333;
-    font-size: 16px;
-    margin: 5px 0 0;
-}
-
-.stat-item p {
-    color: #666;
-    font-size: 12px;
-    margin: 0;
-}
-
 .interests {
     margin-top: 15px;
     text-align: center;
@@ -340,34 +296,30 @@ h1, h3 {
     border-radius: 10px;
 }
 
-.tab-buttons {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-}
-
-.tab-button {
-    flex: 1;
-    padding: 10px 0;
-    background: #c1ceee;
+.v-card {
     border: none;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    color: #666;
-    border-bottom: 2px solid transparent;
+    text-align: left;
 }
 
-.tab-button.active {
-    color: #3f51b5;
-    border-bottom: 2px solid #3f51b5;
-    background: #a1a1e7;
+.tab-item {
+    font-size: .7rem;
 }
 
-.tab-button:hover {
-    background: #a1a1e7;
+.tab-text {
+    margin-top: 4px;
 }
-.tab-pane {
-    display: block !important;
+
+.scrollable-container {
+    max-height: 48vh;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
+
+.activity-cards-container {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: .5em;
+    padding: 10px;
+}
+
 </style>
