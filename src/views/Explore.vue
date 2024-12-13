@@ -9,7 +9,7 @@
         />
         <div class="search-bar-container">
             <div class="search-bar">
-                <v-icon class="filter-icon">mdi-tune</v-icon>
+                <v-icon class="filter-icon" @click="navigateToAdvancedFilters">mdi-tune</v-icon>
                 <input type="text" placeholder="Recherche..." class="search-input" v-model="searchVal" />
                 <v-icon class="search-icon" @click="filterActivities">mdi-magnify</v-icon>
             </div>
@@ -51,7 +51,6 @@ export default {
     setup() {
 
         const store = useStore();
-        const userLocation = ref(null);
         const searchVal = ref('');
         const filteredActivitiesMap = ref(null);
         const filteredActivitiesCatalog = ref(null);
@@ -114,9 +113,9 @@ export default {
                 } else {
                     return [
                         {
-                        icon: typeof icon === "function" ? icon(value) : icon,
-                        text: formatter(value),
-                        key,
+                            icon: typeof icon === "function" ? icon(value) : icon,
+                            text: formatter(value),
+                            key,
                         },
                     ];
                 }
@@ -137,12 +136,13 @@ export default {
             }
         };
 
-        const getUserLocation = () => {
+        const getUserLocation = async () => {
             return new Promise((resolve, reject) => {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
                             const location = { lat: position.coords.latitude, lng: position.coords.longitude };
+                            store.updateUserLocation(location);
                             resolve(location);
                         },
                         (error) => {
@@ -159,41 +159,50 @@ export default {
         };
 
         const calculateDistanceBetween = async (origin, destination) => {
-
             if (!origin || !destination) {
-                return null;
+                // throw new Error("Origin ou destination invalide.");
+                return;
             }
-            
-            const originFormatted = 
-                origin instanceof google.maps.LatLng 
-                    ? origin 
+
+            const originFormatted =
+                origin instanceof google.maps.LatLng
+                    ? origin
                     : new google.maps.LatLng(origin.lat, origin.lng);
-            
-            const destinationFormatted = 
-                destination instanceof google.maps.LatLng 
-                    ? destination 
+
+            const destinationFormatted =
+                destination instanceof google.maps.LatLng
+                    ? destination
                     : new google.maps.LatLng(destination.lat, destination.lng);
 
             return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error("Timeout lors de l'appel à DistanceMatrixService."));
+                }, 10000);
+
                 new google.maps.DistanceMatrixService().getDistanceMatrix(
                     {
                         origins: [originFormatted],
                         destinations: [destinationFormatted],
-                        travelMode: 'DRIVING',
+                        travelMode: "DRIVING",
                     },
                     (response, status) => {
-                        if (status === 'OK') {
-                            const distance = response.rows[0].elements[0].distance.text;
-                            const duration = response.rows[0].elements[0].duration.text;
-                            resolve({ distance, duration });
+                        clearTimeout(timeout);
+                        if (status === "OK") {
+                            try {
+                                const distance = response.rows[0].elements[0].distance.text;
+                                const duration = response.rows[0].elements[0].duration.text;
+                                resolve({ distance, duration });
+                            } catch (err) {
+                                reject(new Error("Erreur lors du traitement des données : " + err.message));
+                            }
                         } else {
-                            console.error('Erreur lors du calcul de la distance : ', status);
-                            reject(status);
+                            reject(new Error("Erreur lors du calcul de la distance : " + status));
                         }
                     }
                 );
             });
         };
+
 
         const locationsAreEqual = (loc1, loc2, tolerance = 0.0001) => {
             if (!loc1 || !loc2) return false;
@@ -204,23 +213,26 @@ export default {
 
         const loadActivities = async () => {
 
+            const currentLocation = await getUserLocation();
+            console.log("USER LOCATION RETRIEVED");
+
             console.log("LOADING ACTIVITIES...");
 
-            const currentLocation = userLocation.value;
             if (
                 !store.lastUserLocation ||
                 !locationsAreEqual(store.lastUserLocation, currentLocation)
             ) {
-                console.log('Position utilisateur mise à jour, réinitialisation du cache des distances.');
-                store.resetDistanceCache();
                 store.updateUserLocation(currentLocation);
+                store.resetDistanceCache();
+                console.log('Position utilisateur mise à jour, réinitialisation du cache des distances.');
             }
 
             const newActivities = await store.refreshActivities();
 
             const distancePromises = store.activities.map(async (activity) => {
                 if (!store.distanceCache[activity._id] || newActivities.includes(activity)) {
-                    const { distance, duration } = await calculateDistanceBetween(userLocation.value, activity.coordinates);
+                    const distanceCalculationResponse = await calculateDistanceBetween(currentLocation, activity.coordinates);
+                    const { distance, duration } = distanceCalculationResponse;
                     store.updateDistanceCache(activity._id, distance, duration);
                     console.log(`Distance calculée pour l'activité ${activity._id}:`, distance, duration);
                 } else {
@@ -263,10 +275,11 @@ export default {
             }
         });
 
+        /*
         onMounted(async () => {
-            userLocation.value = await getUserLocation();
             await loadActivities();
         });
+        */
 
         const debouncedLoadActivities = debounce(async () => {
             await loadActivities();
@@ -288,7 +301,6 @@ export default {
 
         return {
             store,
-            userLocation,
             advancedFilters,
             formattedFilters,
             removeFilter,
@@ -318,6 +330,9 @@ export default {
                 this.filterActivities();
                 this.isActivitySelected = false;
             }
+        },
+        navigateToAdvancedFilters() {
+            this.$router.push('/advancedfilters');
         }
     }
 };
