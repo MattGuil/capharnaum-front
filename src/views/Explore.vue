@@ -74,7 +74,7 @@ export default {
                 remover: () => undefined,
             },
             {
-                key: "prix",
+                key: "price",
                 icon: "mdi-currency-eur",
                 formatter: ({ min, max }) => (min === 0 && max === 0 ? "gratuit" : `${min} - ${max}`),
                 remover: () => undefined,
@@ -134,6 +134,9 @@ export default {
             } else {
                 advancedFilters.value[filter.key] = newValue;
             }
+            store.updateAdvancedFilters(advancedFilters.value);
+            console.log("ADVANCED FILTERS UPDATED IN THE STORE.");
+            debouncedLoadActivities();
         };
 
         const getUserLocation = async () => {
@@ -275,25 +278,13 @@ export default {
             }
         });
 
-        /*
         onMounted(async () => {
             await loadActivities();
         });
-        */
 
         const debouncedLoadActivities = debounce(async () => {
             await loadActivities();
         }, 300);
-
-        watch(
-            () => advancedFilters.value,
-            (newFilters) => {
-                store.updateAdvancedFilters(newFilters);
-                console.log("ADVANCED FILTERS UPDATED IN THE STORE.");
-                debouncedLoadActivities();
-            },
-            { deep: true }
-        );
 
         watch(searchVal, () => {
             if (!searchVal.value) filterActivities();
@@ -356,7 +347,7 @@ export default {
 }
 
 .search-bar {
-    width: 90%;
+    min-width: 90%;
     height: 40px;
     display: flex;
     justify-content: space-between;
@@ -364,7 +355,6 @@ export default {
     background: rgba(255, 255, 255, .8);
     border-radius: 20px;
     padding: 8px;
-    max-width: 400px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 

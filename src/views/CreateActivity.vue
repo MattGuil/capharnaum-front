@@ -139,8 +139,8 @@
 </template>
 
 <script>
-import { useStore } from '../stores/store';
 import axios from 'axios';
+import { useStore } from '../stores/store';
 import { ref, onMounted } from 'vue';
 import { VNumberInput } from 'vuetify/labs/VNumberInput';
 import { VDateInput } from 'vuetify/labs/VDateInput';
@@ -157,12 +157,11 @@ export default {
 
         const store = useStore();
 
-        const disciplines = ['danse', 'dessin', 'théâtre', 'musique', 'photographie'];
-        const types = ['ponctuelle', 'regulière'];
-        const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-        
-        const startTimeMenu = ref(false);
-        const endTimeMenu = ref(false);
+        const disciplines = ref([]);
+        const types = ref([]);
+        const days = ref([]);
+
+        const isLoadingEnums = ref(true);
 
         const form = ref({
             title: '',
@@ -191,6 +190,32 @@ export default {
         let addressAutocompleteInit = false;
         let addressAutocomplete = null;
 
+        const startTimeMenu = ref(false);
+        const endTimeMenu = ref(false);
+
+        const fetchEnums = async () => {
+            try {
+                const { data } = await axios.get(`${import.meta.env.APP_BACK_URL}/enums`);
+                disciplines.value = Array.isArray(data.Disciplines)
+                    ? data.Disciplines
+                    : Object.values(data.Disciplines);
+
+                types.value = Array.isArray(data.ActivityTypes)
+                    ? data.ActivityTypes
+                    : Object.values(data.ActivityTypes);
+
+                days.value = Array.isArray(data.Days)
+                    ? data.Days
+                    : Object.values(data.Days);
+            } catch (error) {
+                errorMessage.value = "Erreur lors de la récupération des énumérés.";
+                errorSnackbarVisible.value = true;
+                console.error(error);
+            } finally {
+                isLoadingEnums.value = false;
+            }
+        };
+
         const initializeAutocomplete = () => {
             if (!addressAutocompleteInit) {
                 const inputElement = addressInput.value?.$el.querySelector('input');
@@ -214,7 +239,9 @@ export default {
             }
         };
 
-        onMounted(() => {
+        onMounted(async () => {
+            await fetchEnums();
+            console.log(disciplines.value);
             initializeAutocomplete();
         })
 
@@ -223,15 +250,16 @@ export default {
             disciplines,
             types,
             days,
-            startTimeMenu,
-            endTimeMenu,
             form,
             rules,
             errorMessage,
             errorSnackbarVisible,
             successSnackbarVisible,
             addressInput, 
-            initializeAutocomplete
+            initializeAutocomplete,
+            startTimeMenu,
+            endTimeMenu,
+            isLoadingEnums
         };
     },
     methods: {
