@@ -74,9 +74,9 @@ export default {
                 remover: () => undefined,
             },
             {
-                key: "price",
-                icon: "mdi-currency-eur",
-                formatter: ({ min, max }) => (min === 0 && max === 0 ? "gratuit" : `${min} - ${max}`),
+                key: "priceRange",
+                icon: null,
+                formatter: ({ min, max }) => (min === 0 && max === 0 ? "gratuit" : `${min}€ - ${max}€`),
                 remover: () => undefined,
             },
             {
@@ -274,7 +274,7 @@ export default {
 
         onBeforeMount(() => {
             if (store.advancedFilters) {
-                advancedFilters.value = { ...store.advancedFilters };
+                advancedFilters.value = store.advancedFilters;
             }
         });
 

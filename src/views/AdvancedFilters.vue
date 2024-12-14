@@ -15,6 +15,14 @@
     >
         <v-radio v-for="type in types" :label="type" :value="type"></v-radio>
     </v-radio-group>
+    <v-range-slider
+        label="Prix"
+        v-model="priceRangeComputed"
+        step="1"
+        max="50"
+        min="0"
+        thumb-label="always"
+    ></v-range-slider>
     <v-autocomplete
         clearable
         chips
@@ -41,7 +49,7 @@
 <script>
 import axios from 'axios';
 import { useStore } from '../stores/store';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 export default {
     name: 'AdvancedFilters',
@@ -56,6 +64,17 @@ export default {
         const days = ref([]);
 
         const advancedFilters = ref({});
+
+        const priceRangeComputed = computed({
+            get() {
+                console.log("GET");
+                return advancedFilters.value.priceRange ? [advancedFilters.value.priceRange.min, advancedFilters.value.priceRange.max] : [0, 10];
+            },
+            set([min, max]) {
+                console.log("SET");
+                advancedFilters.value.priceRange = { min, max };
+            }
+        });
 
         const fetchEnums = async () => {
             try {
@@ -97,19 +116,22 @@ export default {
             disciplines,
             types,
             days,
-            advancedFilters
+            advancedFilters,
+            priceRangeComputed
         }
     },
     methods: {
         updateAdvancedFilters() {
+            console.log(this.advancedFilters);
             this.store.updateAdvancedFilters(this.advancedFilters);
             console.log("ADVANCED FILTERS UPDATED IN THE STORE.");
             this.$router.push('/explore');
         },
         resetAdvancedFilters() {
-            this.advancedFilters.disciplines = [];
-            this.advancedFilters.type = null;
-            this.advancedFilters.days = [];
+            delete this.advancedFilters.disciplines;
+            delete this.advancedFilters.type;
+            delete this.advancedFilters.priceRange;
+            delete this.advancedFilters.days;
             this.store.updateAdvancedFilters(this.advancedFilters);
             console.log("ADVANCED FILTERS UPDATED IN THE STORE.");
         }

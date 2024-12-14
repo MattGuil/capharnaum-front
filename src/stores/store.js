@@ -5,10 +5,7 @@ export const useStore = defineStore('store', {
     state: () => ({
         userId: null,
         lastUserLocation: null,
-        advancedFilters: {
-            disciplines: ['danse'],
-            days: ['lundi'],
-        },
+        advancedFilters: {},
         activities: [],
         distanceCache: {},
     }),
