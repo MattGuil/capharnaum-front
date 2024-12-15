@@ -157,11 +157,10 @@ export default {
 
         const store = useStore();
 
+        const isLoadingEnums = ref(true);
         const disciplines = ref([]);
         const types = ref([]);
         const days = ref([]);
-
-        const isLoadingEnums = ref(true);
 
         const form = ref({
             title: '',
