@@ -1,48 +1,46 @@
 <template>
-    <v-main class="main-container">
-        <div class="banner" :style="{ backgroundImage: `url(${srcImage})` }"></div>
+    <div class="banner" :style="{ backgroundImage: `url(${srcImage})` }"></div>
 
-        <v-card class="elevation-0 w-100 pa-10 card-container">
-            <i @click="updateFavorites()" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
+    <v-card class="elevation-0 w-100 pa-10 card-container">
+        <i @click="updateFavorites()" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
 
-            <h1 v-if="activity">{{ activity.title }}</h1>
-            <h2 v-if="activity" class="event-title">{{ activity.placeName }}</h2>
-            
-            <div class="event-details">
-                <div class="event-info">
-                    <p v-if="activity">📍 {{ activity.address }}</p>
-                    <p v-if="activity">⏰ {{ activity.startTime + ' - ' + activity.endTime }}</p>
-                </div>
-
-                <p v-if="activity" class="event-description">{{ activity.description }}</p>
-
-                <div class="event-buttons">
-                    <button class="btn btn-participate" @click="showPopup = true">
-                        Je participe
-                    </button>
-                    <button class="btn btn-message">
-                        Envoyer un message
-                    </button>
-                </div>
-
-                <div class="social-actions">
-                    <button @click="shareEvent" class="action-btn">
-                        Partager
-                    </button>
-                    <button @click="commentEvent" class="action-btn">
-                        Commenter <span class="badge">0</span>
-                    </button>
-                    <button @click="rateEvent" class="action-btn">
-                        Noter <span class="rating">0</span>
-                    </button>
-                </div>
+        <h1 v-if="activity">{{ activity.title }}</h1>
+        <h2 v-if="activity" class="event-title">{{ activity.placeName }}</h2>
+        
+        <div class="event-details">
+            <div class="event-info">
+                <p v-if="activity">📍 {{ activity.address }}</p>
+                <p v-if="activity">⏰ {{ activity.startTime + ' - ' + activity.endTime }}</p>
             </div>
 
-            <v-snackbar v-model="snackbarVisible" :timeout="3000" location="bottom center" color="green">
-                Vous êtes inscrit !
-            </v-snackbar>
-        </v-card>
-    </v-main>
+            <p v-if="activity" class="event-description">{{ activity.description }}</p>
+
+            <div class="event-buttons">
+                <button class="btn btn-participate" @click="showPopup = true">
+                    Je participe
+                </button>
+                <button class="btn btn-message">
+                    Envoyer un message
+                </button>
+            </div>
+
+            <div class="social-actions">
+                <button @click="shareEvent" class="action-btn">
+                    Partager
+                </button>
+                <button @click="commentEvent" class="action-btn">
+                    Commenter <span class="badge">0</span>
+                </button>
+                <button @click="rateEvent" class="action-btn">
+                    Noter <span class="rating">0</span>
+                </button>
+            </div>
+        </div>
+
+        <v-snackbar v-model="snackbarVisible" :timeout="3000" location="bottom center" color="green">
+            Vous êtes inscrit !
+        </v-snackbar>
+    </v-card>
 
     <div v-if="showPopup" class="popup-overlay">
         <div class="popup">
@@ -206,17 +204,13 @@ export default {
 
 
 <style scoped>
-.main-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #f5f5f5;
-    overflow: auto;
+
+.v-container {
+    position: relative;
 }
 
-/* Section bannière */
 .banner {
+    position: fixed;
     width: 100%;
     height: 30vh;
     background-size: cover;
@@ -224,14 +218,15 @@ export default {
     background-repeat: no-repeat;
 }
 
-/* La carte */
 .card-container {
+    z-index: 1;
+    position: absolute;
     width: 100%;
-    height: 80vh;
+    bottom: 8vh;
+    height: 70vh;
     background: rgba(255, 255, 255, 1);
     padding: 20px;
-    z-index: 1;
-    max-height: 100%;
+    border-radius: 20px 20px 0 0;
     overflow-y: auto;
 }
 
@@ -407,8 +402,8 @@ h1 {
 
 .mdi {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: 20px;
 }
 
 .mdi-heart-outline {

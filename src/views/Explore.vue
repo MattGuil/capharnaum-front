@@ -76,7 +76,19 @@ export default {
             {
                 key: "priceRange",
                 icon: null,
-                formatter: ({ min, max }) => (min === 0 && max === 0 ? "gratuit" : `${min}€ - ${max}€`),
+                formatter: ({ min, max }) => {
+                    if (min === 0 && max === 0) {
+                        return "gratuit";
+                    } else if (min !== null && max !== null && min === max) {
+                        return `${min}€`;
+                    } else if (min !== null && (max === null || max === 50)) {
+                        return `à partir de ${min}€`;
+                    } else if ((min === null || min === 0) && max !== null) {
+                        return `jusqu'à ${max}€`;
+                    } else {
+                        return `${min}€ - ${max}€`;
+                    }
+                },
                 remover: () => undefined,
             },
             {

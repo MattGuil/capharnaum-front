@@ -1,6 +1,5 @@
 <template>
     <v-card class="elevation-0 w-100 pa-10">
-
         <h1>Filtres avancés</h1>
 
         <fieldset>
@@ -9,13 +8,18 @@
                 clearable
                 chips
                 v-model="advancedFilters.disciplines"
+                variant="solo"
                 :items="disciplines"
                 multiple
-            ></v-autocomplete>
+            >
+                <template v-slot:chip>
+                    <v-chip class="custom-chip"></v-chip>
+                </template>
+            </v-autocomplete>
         </fieldset>
 
         <fieldset>
-            <div>
+            <div class="restore">
                 <legend>Type d'activité</legend>
                 <v-btn variant="plain" class="restore-btn" @click="resetFilter('type')">
                     <v-icon icon="mdi-restore"></v-icon>
@@ -30,7 +34,7 @@
         </fieldset>
 
         <fieldset>
-            <div>
+            <div class="restore">
                 <legend>Prix</legend>
                 <v-btn variant="plain" class="restore-btn" @click="resetFilter('priceRange')">
                     <v-icon icon="mdi-restore"></v-icon>
@@ -42,7 +46,11 @@
                 max="50"
                 min="0"
                 thumb-label="always"
-            ></v-range-slider>
+            >
+                <template v-slot:thumb-label="{ modelValue }">
+                    {{ modelValue + "€" }}
+                </template>
+            </v-range-slider>
         </fieldset>
 
         <fieldset>
@@ -51,13 +59,18 @@
                 clearable
                 chips
                 v-model="advancedFilters.days"
+                variant="solo"
                 :items="days"
                 multiple
-            ></v-autocomplete>
+            >
+                <template v-slot:chip>
+                    <v-chip class="custom-chip"></v-chip>
+                </template>
+            </v-autocomplete>
         </fieldset>
 
         <fieldset>
-            <div>
+            <div class="restore">
                 <legend>Période</legend>
                 <v-btn variant="plain" class="restore-btn" @click="resetFilter('dateRange')">
                     <v-icon icon="mdi-restore"></v-icon>
@@ -66,6 +79,7 @@
             <div class="date-range-inputs">
                 <v-date-input
                     v-model="advancedFilters.dateRange.start"
+                    variant="solo"
                     color="black"
                     prepend-icon=""
                     placeholder="Début"
@@ -73,6 +87,7 @@
 
                 <v-date-input
                     v-model="advancedFilters.dateRange.end"
+                    variant="solo"
                     color="black"
                     prepend-icon=""
                     placeholder="Fin"
@@ -81,7 +96,7 @@
         </fieldset>
 
         <fieldset>
-            <div>
+            <div class="restore">
                 <legend>Période horaire</legend>
                 <v-btn variant="plain" class="restore-btn" @click="resetFilter('timeRange')">
                     <v-icon icon="mdi-restore"></v-icon>
@@ -90,6 +105,7 @@
             <div class="time-range-inputs">
                 <v-text-field
                     v-model="advancedFilters.timeRange.start"
+                    variant="solo"
                     label="Début"
                     :active="startTimeMenu"
                     @focus="startTimeMenu"
@@ -113,6 +129,7 @@
 
                 <v-text-field
                     v-model="advancedFilters.timeRange.end"
+                    variant="solo"
                     label="Fin"
                     :active="endTimeMenu"
                     @focus="endTimeMenu"
@@ -137,7 +154,6 @@
         </fieldset>
 
         <div class="buttons">
-
             <v-btn
                 variant="outlined"
                 @click="resetAdvancedFilters()"
@@ -151,9 +167,7 @@
             >
                 Appliquer
             </v-btn>
-
         </div>
-
     </v-card>
 </template>
 
@@ -239,6 +253,9 @@ export default {
         });
 
         onUnmounted(() => {
+            if (advancedFilters.value.priceRange && advancedFilters.value.priceRange.min == 0 && advancedFilters.value.priceRange.max == 50) {
+                delete advancedFilters.value.priceRange;
+            }
             if (!advancedFilters.value.dateRange.start && !advancedFilters.value.dateRange.end) {
                 delete advancedFilters.value.dateRange;
             }
@@ -268,7 +285,7 @@ export default {
             if (filterName == 'dateRange' || filterName == 'timeRange') {
                 this.advancedFilters[filterName] = { start: null, end: null };
             } else if (filterName == 'priceRange') {
-                this.advancedFilters[filterName] = { min: 0, end: 50 };
+                this.advancedFilters[filterName] = { min: 0, max: 50 };
             } else if (filterName == 'type') {
                 delete this.advancedFilters[filterName];
             }
@@ -291,7 +308,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 
 .v-card {
     width: 100%;
@@ -301,10 +318,10 @@ export default {
 }
 
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
-fieldset > div {
+fieldset div.restore {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -324,13 +341,13 @@ legend {
     font-size: 1em;
 }
 
-label {
-    color: black !important;
-    opacity: 1 !important;
+.v-range-slider {
+    margin-top: 25px;
 }
 
-.v-slider__container {
-    margin-top: 25px;
+.custom-chip {
+    background-color: #3c4798 !important;
+    color: white;
 }
 
 .date-range-inputs, .time-range-inputs {
@@ -340,13 +357,14 @@ label {
 }
 
 .buttons {
-    display: flex;
-    justify-content: center;
-    padding-top: 20px;
+    padding-top: 20px !important;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
 
-    .v-btn {
-        margin: 0 5px;
-    }
+button[variant="elevated"] {
+    border: none;
 }
 
 </style>

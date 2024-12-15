@@ -1,127 +1,159 @@
 <template>
     <v-card class="elevation-0 w-100 pa-10">
-        <h3>Créer une nouvelle activité</h3>
+        <h1>Créer une nouvelle activité</h1>
 
         <v-form @submit.prevent="createActivity">
-            <v-text-field
-                v-model="form.title"
-                label="Intitulé"
-                variant="solo"
-                :rules="[rules.required]"
-            ></v-text-field>
+            <fieldset>
+                <legend>Intitulé</legend>
+                <v-text-field
+                    class="custom-input"
+                    v-model="form.title"
+                    variant="solo"
+                    :rules="[rules.required]"
+                ></v-text-field>
+            </fieldset>
 
-            <v-select
-                v-model="form.discipline"
-                label="Discipline"
-                :items="disciplines"
-                variant="solo"
-                :rules="[rules.required]"
-            ></v-select>
+            <fieldset>
+                <legend>Discipline</legend>
+                <v-select
+                    class="custom-input"
+                    v-model="form.discipline"
+                    :items="disciplines"
+                    variant="solo"
+                    :rules="[rules.required]"
+                ></v-select>
+            </fieldset>
 
-            <v-text-field
-                ref="addressInput"
-                v-model="form.address"
-                label="Adresse"
-                variant="solo"
-                :rules="[rules.required]"
-            ></v-text-field>
+            <fieldset>
+                <legend>Adresse</legend>
+                <v-text-field
+                    class="custom-input"
+                    ref="addressInput"
+                    v-model="form.address"
+                    variant="solo"
+                    :rules="[rules.required]"
+                ></v-text-field>
+            </fieldset>
 
-            <v-radio-group 
-                v-model="form.type"
-                label="Type"
-                inline
-                :rules="[rules.required]"
-            >
-                <v-radio v-for="type in types" :label="type" :value="type"></v-radio>
-            </v-radio-group>
-
-            <v-select
-                v-if="form.type === 'regulière'"
-                v-model="form.day"
-                label="Jour de la semaine"
-                :items="days"
-                variant="solo"
-                :rules="form.type === 'regulière' ? [rules.required] : []"
-            ></v-select>
-
-            <v-date-input
-                v-if="form.type === 'ponctuelle'"
-                v-model="form.date"
-                label="Date"
-                variant="solo"
-                prepend-icon=""
-                color="black"
-                :rules="form.type === 'ponctuelle' ? [rules.required] : []"
-            ></v-date-input>
-
-            <v-text-field
-                v-model="form.startTime"
-                label="Heure de début"
-                :active="startTimeMenu"
-                @focus="startTimeMenu"
-                readonly
-                variant="solo"
-                :rules="[rules.required]"
-            >
-                <v-menu
-                    v-model="startTimeMenu"
-                    :close-on-content-click="true"
-                    activator="parent"
-                    transition="scale-transition"
+            <fieldset>
+                <legend>Type d'activité</legend>
+                <v-radio-group
+                    v-model="form.type"
+                    inline
+                    :rules="[rules.required]"
                 >
-                    <v-time-picker
-                        v-if="startTimeMenu"
+                    <v-radio v-for="type in types" :label="type" :value="type"></v-radio>
+                </v-radio-group>
+            </fieldset>
+
+            <fieldset v-if="form.type === 'regulière'">
+                <legend>Jour de la semaine</legend>
+                <v-select
+                    class="custom-input"
+                    v-model="form.day"
+                    :items="days"
+                    variant="solo"
+                    :rules="form.type === 'regulière' ? [rules.required] : []"
+                ></v-select>
+            </fieldset>
+
+            <fieldset v-if="form.type === 'ponctuelle'">
+                <legend>Date</legend>
+                <v-date-input
+                    class="custom-input"
+                    v-model="form.date"
+                    variant="solo"
+                    prepend-icon=""
+                    placeholder=""
+                    color="black"
+                    :rules="form.type === 'ponctuelle' ? [rules.required] : []"
+                ></v-date-input>
+            </fieldset>
+
+            <fieldset>
+                <legend>Horaires</legend>
+                <div class="time-range-inputs">
+                    <v-text-field
+                        class="custom-input"
                         v-model="form.startTime"
-                        format="24hr"
-                        color="#3c4798"
-                    ></v-time-picker>
-                </v-menu>                   
-            </v-text-field>
+                        label="Début"
+                        :active="startTimeMenu"
+                        @focus="startTimeMenu"
+                        readonly
+                        variant="solo"
+                        :rules="[rules.required]"
+                    >
+                        <v-menu
+                            v-model="startTimeMenu"
+                            :close-on-content-click="true"
+                            activator="parent"
+                            transition="scale-transition"
+                        >
+                            <v-time-picker
+                                v-if="startTimeMenu"
+                                v-model="form.startTime"
+                                format="24hr"
+                                color="#3c4798"
+                            ></v-time-picker>
+                        </v-menu>                   
+                    </v-text-field>
 
-            <v-text-field
-                v-model="form.endTime"
-                label="Heure de fin"
-                :active="endTimeMenu"
-                @focus="endTimeMenu"
-                readonly
-                variant="solo"
-                :rules="[rules.required]"
-            >
-                <v-menu
-                    v-model="endTimeMenu"
-                    :close-on-content-click="true"
-                    activator="parent"
-                    transition="scale-transition"
-                >
-                    <v-time-picker
-                        v-if="endTimeMenu"
+                    <v-text-field
+                        class="custom-input"
                         v-model="form.endTime"
-                        format="24hr"
-                        color="#3c4798"
-                    ></v-time-picker>
-                </v-menu>                   
-            </v-text-field>
+                        label="Fin"
+                        :active="endTimeMenu"
+                        @focus="endTimeMenu"
+                        readonly
+                        variant="solo"
+                        :rules="[rules.required]"
+                    >
+                        <v-menu
+                            v-model="endTimeMenu"
+                            :close-on-content-click="true"
+                            activator="parent"
+                            transition="scale-transition"
+                        >
+                            <v-time-picker
+                                v-if="endTimeMenu"
+                                v-model="form.endTime"
+                                format="24hr"
+                                color="#3c4798"
+                            ></v-time-picker>
+                        </v-menu>                   
+                    </v-text-field>
+                </div>
+            </fieldset>
 
-            <v-textarea
-                v-model="form.description"
-                label="Description (optionnelle)"
-                auto-grow
-                variant="solo"
-            ></v-textarea>
+            <fieldset>
+                <legend>Description (optionnelle)</legend>
+                <v-textarea
+                    class="custom-input"
+                    v-model="form.description"
+                    auto-grow
+                    variant="solo"
+                ></v-textarea>
+            </fieldset>
 
-            <v-number-input
-                v-model="form.price"
-                label="Prix (€)"
-                min="0"
-                variant="solo"
-            ></v-number-input>
+            <fieldset>
+                <legend>Prix (€)</legend>
+                <v-number-input
+                    class="custom-input"
+                    v-model="form.price"
+                    min="0"
+                    variant="solo"
+                ></v-number-input>
+            </fieldset>
 
-            <v-number-input
-                v-model="form.maxParticipants"
-                label="Capacité d'accueil (personnes)"
-                min="1"
-                variant="solo"
-            ></v-number-input>
+            <fieldset>
+                <legend>Capacité d'accueil (personnes)</legend>
+                <v-number-input
+                    class="custom-input"
+                    v-model="form.maxParticipants"
+                    min="1"
+                    variant="solo"
+                ></v-number-input>
+            </fieldset>
 
             <v-btn type="submit" color="#3c4798" class="mt-4" block>
                 Créer l'activité
@@ -347,6 +379,7 @@ export default {
 </script>
 
 <style scoped>
+
 .v-card {
     width: 100%;
     margin-top: 12vh;
@@ -355,8 +388,27 @@ export default {
     border-radius: 20px 20px 0 0;
 }
 
-form {
-    margin-top: 50px;
+h1 {
+    margin-bottom: 25px;
+}
+
+legend {
+    font-size: 1em;
+}
+
+label {
+    color: black !important;
+    opacity: 1 !important;
+}
+
+.custom-input {
+    box-shadow: none !important;
+}
+
+.time-range-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
 }
 
 </style>  
