@@ -88,13 +88,46 @@ export default {
             {
                 key: "dateRange",
                 icon: "mdi-calendar-blank",
-                formatter: ({ start, end }) => (start === end ? start : `${start} - ${end}`),
+                formatter: ({ start, end }) => {
+                    const formatDate = (date) => {
+                        if (!date) return "";
+                        const d = new Date(date);
+                        return d.toLocaleDateString("fr-FR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                        });
+                    };
+
+                    const formattedStart = formatDate(start);
+                    const formattedEnd = formatDate(end);
+
+                    if (start && !end) {
+                        return `à partir du ${formattedStart}`;
+                    } else if (end && !start) {
+                        return `jusqu'au ${formattedEnd}`;
+                    } else if (formattedStart === formattedEnd) {
+                        return formattedStart;
+                    } else {
+                        return `${formattedStart} - ${formattedEnd}`;
+                    };
+                },
                 remover: () => undefined,
             },
             {
                 key: "timeRange",
                 icon: "mdi-clock-time-four",
-                formatter: ({ start, end }) => (start === end ? start : `${start} - ${end}`),
+                formatter: ({ start, end }) => {
+                    if (start && !end) {
+                        return `à partir de ${start}`;
+                    } else if (end && !start) {
+                        return `jusqu'à ${end}`;
+                    } else if (start === end) {
+                        return start;
+                    } else {
+                        return `${start} - ${end}`;
+                    }
+                },
                 remover: () => undefined,
             },
         ];
