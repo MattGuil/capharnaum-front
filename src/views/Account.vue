@@ -1,5 +1,5 @@
 <template>
-     <v-icon @click="toggleMenu" class="menu-button" color="blue-darken-2">mdi-menu</v-icon>
+    <v-icon @click="toggleMenu" class="menu-button" color="white">mdi-menu</v-icon>
     <v-icon @click="logout" class="btn-logout" color="white">mdi-logout</v-icon>
 
     <!-- Menu latéral -->
@@ -41,7 +41,6 @@
         </div>
     </transition>
 
-    <!-- Interface principale -->
     <div class="profile-card">
         <div>
             <div class="profile-header">
@@ -141,12 +140,14 @@ export default {
         }
     },
     setup(props) {
+
+        const menuVisible = ref(false);
+        
         const store = useStore();
         const user = ref(null);
         const activities = ref(null);
         const participations = ref(null);
         const favorites = ref(null);
-        const menuVisible = ref(false); // Propriété pour le menu
         const tab = ref(null);
 
         const fetchUserData = async (userId) => {
@@ -160,7 +161,39 @@ export default {
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
             }
-            // Activités, participations et favoris
+            
+            try {
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/user/${userId}`);
+                if (response.status === 200) {
+                    activities.value = response.data;
+                } else {
+                    console.log("Erreur lors de la récupération des activités animées par l'utilisateur");
+                }
+            } catch (error) {
+                console.error("Erreur de connexion ou autre :", error);
+            }
+
+            try {
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/participation/user/${userId}`);
+                if (response.status === 200) {
+                    participations.value = response.data;
+                } else {
+                    console.log("Erreur lors de la récupération des activités animées par l'utilisateur");
+                }
+            } catch (error) {
+                console.error("Erreur de connexion ou autre :", error);
+            }
+
+            try {
+				const response = await axios.get(`${import.meta.env.APP_API_URL}/favorite/user/${userId}`);
+				if (response.status === 200) {
+					favorites.value = response.data;
+				} else {
+					console.log("Erreur lors de la récupération des favoris")
+				}
+			} catch (error) {
+				console.error("Erreur de connexion ou autre :", error);
+			}
         };
 
         const toggleMenu = () => {
@@ -191,7 +224,18 @@ export default {
     },
     methods: {
         logout() {
-            // Déconnexion
+            try {
+                axios.get(`${import.meta.env.APP_API_URL}/user/logout`, { withCredentials: true })
+                .then(res => {
+                    console.log(res.status);
+                    if (res.status === 200) {
+                        this.store.resetStore();
+                        this.$router.push('/login');
+                    };
+                });
+            } catch (error) {
+                console.log("Erreur lors de la déconnexion.");
+            }
         }
     },
     computed: {
@@ -203,13 +247,14 @@ export default {
 </script>
 
 <style scoped>
-/* Styles du menu + ceux existants */
+
 .menu-button {
     position: absolute;
     top: 20px;
     left: 20px;
     cursor: pointer;
 }
+
 .menu-container {
     position: fixed;
     top: 0;
@@ -220,9 +265,11 @@ export default {
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
 }
+
 .menu {
     padding: 20px;
 }
+
 .close-button {
     position: absolute;
     top: 10px;

@@ -2,26 +2,31 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
+import Home from '../views/Home.vue';
+import Explore from '../views/Explore.vue';
+import AdvancedFilters from "../views/AdvancedFilters.vue";
+import Activity from '../views/Activity.vue';
+import CreateActivity from '../views/CreateActivity.vue';
+import Messages from "../views/Messages.vue";
 import Account from '../views/Account.vue';
 import AccountSettings from '../views/AccountSettings.vue';
+
+/*
 import AccountFavorites from '../views/AccountFavorites.vue';
 import AccountActivities from '../views/AccountActivities.vue';
 import AccountProposals from '../views/AccountProposals.vue';
 import ManageActivity from '../views/ManageActivity.vue';
 import ManageProposal from '../views/ManageProposal.vue';
-import Explore from '../views/Explore.vue';
-import AdvancedFilters from "../views/AdvancedFilters.vue";
-import Activity from '../views/Activity.vue';
 import Participate from '../views/Participate.vue';
-import CreateActivity from '../views/CreateActivity.vue';
 import CreateProposal from '../views/CreateProposal.vue';
+*/
 
 import axios from 'axios';
 
 const routes = [
   {
     path: "/",
-    redirect: "/login"
+    redirect: "/home"
   },
   {
     path: "/login",
@@ -32,6 +37,43 @@ const routes = [
     path: "/register",
     name: "Register",
     component: Register,
+  },
+  {
+    path: "/home",
+    name: "Home",
+    component: Home,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/explore',
+    name: 'Explore',
+    component: Explore,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/advancedfilters',
+    name: 'AdvancedFilters',
+    component: AdvancedFilters,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/activity/:id',
+    name: 'Activity',
+    component: Activity,
+    props: true,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/create/activity',
+    name: 'CreateActivity',
+    component: CreateActivity,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/messages",
+    name: "Messages",
+    component: Messages,
+    meta: { requiresAuth: true },
   },
   {
     path: '/profile/:id',
@@ -46,6 +88,7 @@ const routes = [
     component: AccountSettings,
     meta: { requiresAuth: true },
   },
+  /*
   {
     path: '/profile/favorites',
     name: 'AccountFavorites',
@@ -77,25 +120,6 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/explore',
-    name: 'Explore',
-    component: Explore,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/advancedfilters',
-    name: 'AdvancedFilters',
-    component: AdvancedFilters,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/activity/:id',
-    name: 'Activity',
-    component: Activity,
-    props: true,
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/participate',
     name: 'Participate',
     component: Participate,
@@ -107,17 +131,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/create/activity',
-    name: 'CreateActivity',
-    component: CreateActivity,
-    meta: { requiresAuth: true },
-  },
-  {
     path: '/create/proposal',
     name: 'CreateProposal',
     component: CreateProposal,
     meta: { requiresAuth: true },
   },
+  */
 ];
 
 const router = createRouter({
