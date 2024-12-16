@@ -73,7 +73,7 @@ export default {
 
                 if (response.status === 200) {
                     store.updateUserId(response.data.userId);
-                    router.push('/explore');
+                    router.push('/home');
                 } else if (response.status === 201) {
                     errorMessage.value = response.data;
                 }

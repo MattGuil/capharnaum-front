@@ -58,7 +58,11 @@
         <div v-if="user && user.interests.length > 0" class="interests">
             <h4>Centres d’intérêt</h4>
             <div class="interest-cards">
-                <div v-for="interest in user.interests" :key="interest" class="interest-card"></div>
+                <v-chip
+                    v-for="(interest, index) in user.interests"
+                    :key="index"
+                    color="#3c4798"
+                >{{ interest }}</v-chip>
             </div>
         </div>
         <v-card v-if="itsMe" class="mt-10" variant="outlined">

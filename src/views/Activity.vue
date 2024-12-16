@@ -95,7 +95,7 @@ export default {
         onMounted(async () => {
             try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/${props.id}`);
-                console.log(response.data);
+                console.log("ACTIVITY LOADED: " + response.data);
                 if (response.status === 200) {
                     activity.value = response.data;
                 } else {

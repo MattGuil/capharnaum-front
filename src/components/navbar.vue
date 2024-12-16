@@ -7,7 +7,7 @@
             <v-icon size="30" color="#3c4798">mdi-magnify</v-icon>
         </v-btn>
         <v-btn value="create" @click="navigateToCreate">
-            <v-icon size="30" color="#3c4798">mdi-plus</v-icon>
+            <v-icon size="30" color="#3c4798">mdi-plus-box-outline</v-icon>
         </v-btn>
         <v-btn value="messages" @click="navigateToMessages">
             <v-icon size="30" color="#3c4798">mdi-email</v-icon>

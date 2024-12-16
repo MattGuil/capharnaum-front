@@ -30,6 +30,17 @@
                         type="password"
                         required
                     ></v-text-field>
+                    <v-autocomplete
+                        clearable
+                        chips
+                        v-model="interests"
+                        :items="disciplines"
+                        multiple
+                    >
+                        <template v-slot:chip>
+                            <v-chip class="custom-chip"></v-chip>
+                        </template>
+                    </v-autocomplete>
                     <v-btn type="submit" color="#3c4798" block>
                         M'inscrire
                     </v-btn>
@@ -50,34 +61,47 @@
 
 <script>
 import axios from 'axios';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
     name: 'Register',
     setup() {
+
+        const disciplines = ref([]);
+
         const prenom = ref('');
         const nom = ref('');
         const email = ref('');
         const password = ref('');
+        const interests = ref([]);
+
         const errorMessage = ref('');
         const router = useRouter();
 
+        onMounted(async () => {
+            const { data } = await axios.get(`${import.meta.env.APP_BACK_URL}/enums`);
+            disciplines.value = Array.isArray(data.Disciplines)
+                ? data.Disciplines
+                : Object.values(data.Disciplines);
+        });
+
         const register = async () => {
-        try {
-            const response = await axios.post(`${import.meta.env.APP_API_URL}/user/register`, {
-                prenom: prenom.value,
-                nom: nom.value,
-                email: email.value,
-                password: password.value
-            });
-            
-            if (response.status === 201) {
-                router.push('/login');
+            try {
+                const response = await axios.post(`${import.meta.env.APP_API_URL}/user/register`, {
+                    prenom: prenom.value,
+                    nom: nom.value,
+                    email: email.value,
+                    password: password.value,
+                    interests: interests.value
+                });
+                
+                if (response.status === 201) {
+                    router.push('/login');
+                }
+            } catch (error) {
+                errorMessage.value = error.response?.data?.error || "Une erreur s'est produite.";
             }
-        } catch (error) {
-            errorMessage.value = error.response?.data?.error || "Une erreur s'est produite.";
-        }
         };
 
         const navigateToLogin = () => {
@@ -85,17 +109,19 @@ export default {
         };
 
         return {
+            disciplines,
             prenom,
             nom,
             email,
             password,
+            interests,
             errorMessage,
             register,
             navigateToLogin
         };
     }
-    }
-    </script>
+}
+</script>
 
 <style scoped>
 
@@ -114,6 +140,11 @@ img {
     color: #3c4798;
     cursor: pointer;
     position: absolute;
+}
+
+.custom-chip {
+    background-color: #3c4798 !important;
+    color: white;
 }
 
 </style>  

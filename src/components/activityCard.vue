@@ -109,6 +109,7 @@ export default {
     height: 150px;
     padding: 10px;
     background-color: white;
+    color: black !important;
     border-radius: 10px;
     box-shadow: 0 5px 5px lightgray;
     cursor: pointer;

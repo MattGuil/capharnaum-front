@@ -9,6 +9,7 @@ export const useStore = defineStore('store', {
             sortMethod: 'price'
         },
         activities: [],
+        activitiesByInterest: {},
         distanceCache: {},
     }),
     getters: {
@@ -34,7 +35,7 @@ export const useStore = defineStore('store', {
         },
         async fetchActivitiesFromAPI(advancedFilters) {
             try {
-                const response = await axios.post(`${import.meta.env.APP_API_URL}/activity/filter`, advancedFilters);
+                const response = await axios.post(`${import.meta.env.APP_API_URL}/activity/filter/${this.userId}`, advancedFilters);
                 if (response.status === 200) {
                     return response.data;
                 } else {
@@ -55,6 +56,9 @@ export const useStore = defineStore('store', {
             this.activities = apiActivities;
 
             return apiActivities;
+        },
+        updateActivitiesByInterest(activitiesByInterest) {
+            state.activitiesByInterest = activitiesByInterest;
         },
         getDistanceFor(activityId) {
             if (this.distanceCache[activityId])
