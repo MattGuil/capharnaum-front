@@ -14,6 +14,38 @@
                 <v-icon class="search-icon" @click="filterActivities">mdi-magnify</v-icon>
             </div>
             <div class="chips">
+                <v-menu
+                    offset-y
+                    close-on-content-click
+                >
+                    <template v-slot:activator="{ on, props }">
+                        <v-btn
+                            v-on="on"
+                            v-bind="props"
+                            color="#545ea4"
+                            elevation="0"
+                            class="sort-method-selector"
+                        >
+                            {{ selectedSortMethod }}
+                            <v-icon class="ml-2" right>mdi-chevron-down</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-subheader>Trier par :</v-list-subheader>
+                        <v-list-item
+                            key="Prix"
+                            @click="sortCatalogActivities('price')"
+                        >
+                            <v-list-item-title>Prix</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item
+                            key="Distance"
+                            @click="sortCatalogActivities('distance')"
+                        >
+                            <v-list-item-title>Distance</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
                 <v-chip
                     v-for="(filter, index) in formattedFilters"
                     :key="index"
@@ -31,6 +63,7 @@
             :activities="filteredActivitiesCatalog"
             id="catalog" 
             @toggle-catalog="clickOnKnob"
+            @sort-method-changed="sortCatalogActivities"
         />
     </div>
 </template>
@@ -251,7 +284,6 @@ export default {
             });
         };
 
-
         const locationsAreEqual = (loc1, loc2, tolerance = 0.0001) => {
             if (!loc1 || !loc2) return false;
             const latDiff = Math.abs(loc1.lat - loc2.lat);
@@ -282,8 +314,13 @@ export default {
                     const distanceCalculationResponse = await calculateDistanceBetween(currentLocation, activity.coordinates);
                     const { distance, duration } = distanceCalculationResponse;
                     store.updateDistanceCache(activity._id, distance, duration);
+                    activity.distance = distance;
+                    activity.duration = duration;
                     console.log(`Distance calculée pour l'activité ${activity._id}:`, distance, duration);
                 } else {
+                    const { distance, duration } = store.distanceCache[activity._id];
+                    activity.distance = distance;
+                    activity.duration = duration;
                     console.log(`Distance récupérée du cache pour l'activité ${activity._id}`);
                 }
             });
@@ -291,7 +328,20 @@ export default {
             await Promise.all(distancePromises);
 
             filteredActivitiesMap.value = store.activities;
-            filteredActivitiesCatalog.value = store.activities;
+
+            if (store.advancedFilters.sortMethod == 'price') {
+                filteredActivitiesCatalog.value = store.activities.sort((a, b) => {
+                    // Trier par prix croissant
+                    return (a.price || 0) - (b.price || 0);
+                });
+            } else if (store.advancedFilters.sortMethod == 'distance') {
+                filteredActivitiesCatalog.value = store.activities.sort((a, b) => {
+                    // Trier par distance croissante
+                    const distanceA = parseFloat(a.distance || 0);
+                    const distanceB = parseFloat(b.distance || 0);
+                    return distanceA - distanceB;
+                });
+            }
 
             console.log("ACTIVITIES LOADED.");
         };
@@ -317,8 +367,27 @@ export default {
             }
         };
 
+        const sortCatalogActivities = (sortMethod) => {
+            if (sortMethod === 'price') {
+                store.updateSortMethod('price');
+                filteredActivitiesCatalog.value = [...filteredActivitiesCatalog.value].sort((a, b) => {
+                    // Trier par prix croissant
+                    return (a.price || 0) - (b.price || 0);
+                });
+            } else if (sortMethod === 'distance') {
+                store.updateSortMethod('distance');
+                filteredActivitiesCatalog.value = [...filteredActivitiesCatalog.value].sort((a, b) => {
+                    // Trier par distance croissante
+                    const distanceA = parseFloat(a.distance || 0);
+                    const distanceB = parseFloat(b.distance || 0);
+                    return distanceA - distanceB;
+                });
+            }
+        }
+
         onBeforeMount(() => {
             if (store.advancedFilters) {
+                store.updateSortMethod('price');
                 advancedFilters.value = store.advancedFilters;
             }
         });
@@ -346,6 +415,7 @@ export default {
             filteredActivitiesMap,
             filteredActivitiesCatalog, 
             filterActivities,
+            sortCatalogActivities,
             map
         };
     },
@@ -370,7 +440,12 @@ export default {
         navigateToAdvancedFilters() {
             this.$router.push('/advancedfilters');
         }
-    }
+    },
+    computed: {
+        selectedSortMethod() {
+            return this.store.advancedFilters.sortMethod == 'price' ? 'Prix' : 'Distance';
+        },
+    },
 };
 </script>
 
@@ -403,8 +478,21 @@ export default {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.search-input {
+    flex-grow: 1;
+    padding: 5px 10px;
+    margin: 0 10px;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.search-input:focus {
+    outline: none;
+}
+
 .chips {
     width: 100%;
+    height: 30px;
     padding: 0 5%;
     margin-top: 10px;
     display: flex;
@@ -420,18 +508,17 @@ export default {
     background-color: #3c4798 !important;
     color: white !important;
     flex-shrink: 0;
+    height: 100%;
 }
 
-.search-input {
-    flex-grow: 1;
-    padding: 5px 10px;
-    margin: 0 10px;
-    font-size: 16px;
-    border-radius: 4px;
+.sort-method-selector {
+    height: 100%; 
+    border-radius: 25px; 
+    text-transform: lowercase;
 }
 
-.search-input:focus {
-    outline: none;
+.v-list-item {
+    height: 5px;
 }
 
 #catalog {

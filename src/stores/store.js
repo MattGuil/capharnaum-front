@@ -5,7 +5,9 @@ export const useStore = defineStore('store', {
     state: () => ({
         userId: null,
         lastUserLocation: null,
-        advancedFilters: {},
+        advancedFilters: {
+            sortMethod: 'price'
+        },
         activities: [],
         distanceCache: {},
     }),
@@ -26,6 +28,9 @@ export const useStore = defineStore('store', {
         },
         updateAdvancedFilters(advancedFilters) {
             this.advancedFilters = advancedFilters;
+        },
+        updateSortMethod(sortMethod) {
+            this.advancedFilters.sortMethod = sortMethod;
         },
         async fetchActivitiesFromAPI(advancedFilters) {
             try {

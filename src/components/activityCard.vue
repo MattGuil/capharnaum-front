@@ -6,7 +6,7 @@
 
         </div>
         <div class="infos">
-            <h1>{{ activity.title }}</h1>
+            <h1>{{ activity.title + " (" + activity.price + "€)" }}</h1>
             <h2>{{ activity.placeName }}<br>({{ store.getDistanceFor(activity._id).distance }})</h2>
             <h3>{{ activity.startTime + " - " + activity.endTime }}</h3>
         </div>

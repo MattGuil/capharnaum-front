@@ -5,12 +5,14 @@
                 <p>_</p>
             </span>
         </div>
-        <div class="activity-cards-container">
-            <activityCard 
-                v-for="activity in activities" 
-                :key="activity.id" 
-                :activity="activity"
-            />
+        <div class="content">
+            <div class="activity-cards-container">
+                <activityCard 
+                    v-for="activity in activities" 
+                    :key="activity.id" 
+                    :activity="activity"
+                />
+            </div>
         </div>
     </div>
 </template>
@@ -33,6 +35,10 @@ export default {
 </script>
 
 <style scoped>
+
+.content {
+    padding-top: 40px;
+}
 
 .knob-container {
     z-index: 100;
@@ -59,7 +65,6 @@ export default {
 }
 
 .activity-cards-container {
-    margin-top: 40px;
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     gap: .5em;
