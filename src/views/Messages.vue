@@ -68,7 +68,7 @@ export default {
 <style scoped>
 .messages-page {
   padding: 20px;
-  background: linear-gradient(to bottom, #f0f4f8, #e8eff5);
+  background: linear-gradient(to bottom, #d6e8f9, #e8eff5);
 }
 .header {
   margin-bottom: 20px;
@@ -77,6 +77,6 @@ export default {
 .message-detail-container {
   padding: 10px;
   border-radius: 10px;
-  background-color: #fff;
+  background-color: rgb(196, 218, 247);
 }
 </style>
