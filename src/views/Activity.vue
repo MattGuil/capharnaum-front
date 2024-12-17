@@ -5,6 +5,13 @@
         <i @click="updateFavorites()" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
 
         <h1 v-if="activity">{{ activity.title }}</h1>
+        <p v-if="owner">
+            organisé par 
+            <div @click="navigateToOwnerProfile()">
+                <img class="owner-avatar" src="../assets/user.png" alt="Photo de profil"> 
+                {{ owner.prenom }}
+            </div>
+        </p>
         <h2 v-if="activity" class="event-title">{{ activity.placeName }}</h2>
         
         <div class="event-details">
@@ -16,12 +23,17 @@
             <p v-if="activity" class="event-description">{{ activity.description }}</p>
 
             <div class="event-buttons">
-                <button class="btn btn-participate" @click="showPopup = true">
-                    Je participe
-                </button>
-                <button class="btn btn-message">
-                    Envoyer un message
-                </button>
+                <v-btn color="#3c4798" v-if="!isRegistered" @click="showPopupParticipate = true">
+                    <v-icon left icon="mdi-note-edit"></v-icon>
+                    Je m'inscris
+                </v-btn>
+                <v-btn v-else class="btn-cancel-participation" @click="showPopupCancelParticipation = true">
+                    Annuler mon inscription
+                </v-btn>
+                <v-btn v-if="owner" class="btn-message">
+                    <v-icon left icon="mdi-email"></v-icon>
+                    Ecrire à {{ owner.prenom }}
+                </v-btn>
             </div>
 
             <div class="social-actions">
@@ -38,17 +50,28 @@
         </div>
 
         <v-snackbar v-model="snackbarVisible" :timeout="3000" location="bottom center" color="green">
-            Vous êtes inscrit !
+            {{ snackbarMessage }}
         </v-snackbar>
     </v-card>
 
-    <div v-if="showPopup" class="popup-overlay">
+    <div v-if="showPopupParticipate" class="popup-overlay">
         <div class="popup">
             <img :src="srcImage" alt="Illustration" class="popup-image" />
-            <h2>Souhaitez-vous participer à {{ activity.title }} ?</h2>
+            <h2>Souhaitez-vous participer à "{{ activity.title }}" ?</h2>
             <div class="popup-buttons">
-                <button class="participate" @click="handleParticipate">Je participe</button>
-                <button class="cancel" @click="handleCancel">J’ai changé d’avis</button>
+                <v-btn color="#3c4798" @click="handleParticipate">Je participe</v-btn>
+                <v-btn color="lightcoral" @click="handleCancel">J’ai changé d’avis</v-btn>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="showPopupCancelParticipation" class="popup-overlay">
+        <div class="popup">
+            <img :src="srcImage" alt="Illustration" class="popup-image" />
+            <h2>Souhaitez-vous vous désinscrire de "{{ activity.title }}" ?</h2>
+            <div class="popup-buttons">
+                <v-btn color="#3c4798" @click="handleCancelParticipation">Je me désinscris</v-btn>
+                <v-btn color="lightcoral" @click="handleCancel">J’ai changé d’avis</v-btn>
             </div>
         </div>
     </div>
@@ -72,11 +95,15 @@ export default {
         const store = useStore();
 
         const activity = ref(null);
+        const owner = ref(null);
         const srcImage = ref('');
         const isFav = ref(false);
+        const isRegistered = ref(false);
 
-        const showPopup = ref(false);
-        
+        const showPopupParticipate = ref(false);
+        const showPopupCancelParticipation = ref(false);
+
+        const snackbarMessage = ref('');
         const snackbarVisible = ref(false);
 
         const loadImage = () => {
@@ -95,17 +122,27 @@ export default {
         onMounted(async () => {
             try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/${props.id}`);
-                console.log("ACTIVITY LOADED: " + response.data);
                 if (response.status === 200) {
                     activity.value = response.data;
                 } else {
-                    console.log('Erreur lors de la récupération de l\'activité');
+                    console.error('Erreur lors de la récupération de l\'activité');
                 }
             } catch (error) {
-                console.error('Erreur de connexion ou autre :', error);
+                console.error(error);
             }
 
             srcImage.value = loadImage();
+
+            try {
+                const response = await axios.get(`${import.meta.env.APP_API_URL}/user/${activity.value.owner}`);
+                if (response.status === 200) {
+                    owner.value = response.data;
+                } else {
+                    console.error('Erreur lors de la récupération de l\'organisateur');
+                }
+            } catch (error) {
+                console.error(error);
+            }
 
             try {
                 const response = await axios.get(
@@ -118,30 +155,62 @@ export default {
                     isFav.value = false;
                 }
             } catch (error) {
-                console.error("Erreur de connexion ou autre :", error);
+                console.error(error);
             }
+
+            try {
+                const response = await axios.get(
+                    `${import.meta.env.APP_API_URL}/participation/check/${store.userId}/${activity.value._id}`
+                );
+                if (response.status === 200) {
+                    isRegistered.value = true;
+                } else {
+                    isRegistered.value = false;
+                }
+            } catch (error) {
+                console.error(error);
+            }
+
         });
 
         const handleParticipate = async () => {
-            showPopup.value = false;
+            showPopupParticipate.value = false;
             try {
                 const response = await axios.post(`${import.meta.env.APP_API_URL}/participation`, {
                     user: store.userId,
                     activity: activity.value._id
                 });
-                if (response.status === 201) {
+                if (response.status === 200) {
+                    isRegistered.value = true;
+                    snackbarMessage.value = "Vous êtes inscrit !";
                     snackbarVisible.value = true;
                 } else {
-                    this.errorMessage = "Erreur lors de la création de l'activité.";
+                    console.error("Erreur lors de l'inscription");
                 }
             } catch (error) {
-                this.errorMessage = "Erreur de connexion ou autre.";
-                console.error("Erreur lors de la création de l'activité", error);
+                console.error(error);
+            }
+        };
+
+        const handleCancelParticipation = async () => {
+            showPopupCancelParticipation.value = false;
+            try {
+                const response = await axios.delete(`${import.meta.env.APP_API_URL}/participation/${store.userId}/${activity.value._id}`);
+                if (response.status === 200) {
+                    isRegistered.value = false;
+                    snackbarMessage.value = "Vous êtes désinscrit !";
+                    snackbarVisible.value = true;
+                } else {
+                    console.error("Erreur lors de la désinscription");
+                }
+            } catch (error) {
+                console.error(error);
             }
         };
 
         const handleCancel = () => {
-            showPopup.value = false;
+            showPopupParticipate.value = false;
+            showPopupCancelParticipation.value = false;
         };
 
         const shareEvent = () => {
@@ -162,11 +231,16 @@ export default {
         return {
             store,
             activity,
+            owner,
             srcImage,
             isFav,
-            showPopup,
+            isRegistered,
+            showPopupParticipate,
+            showPopupCancelParticipation,
+            snackbarMessage,
             snackbarVisible,
             handleParticipate,
+            handleCancelParticipation,
             handleCancel,
             shareEvent,
             commentEvent,
@@ -197,11 +271,13 @@ export default {
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
             }
+        },
+        navigateToOwnerProfile() {
+            this.$router.push(`/profile/${this.owner._id}`);
         }
     }
 };
 </script>
-
 
 <style scoped>
 
@@ -231,7 +307,21 @@ export default {
 }
 
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 0;
+}
+
+h1 + p {
+    display: flex;
+}
+
+h1 + p div {
+    cursor: pointer;
+    height: 30px;
+}
+
+.owner-avatar {
+    height: 80%;
+    margin-left: 5px;
 }
 
 .event-title {
@@ -265,50 +355,21 @@ h1 {
 
 .event-buttons {
     display: flex;
+    flex-direction: column;
     gap: 10px;
     margin: 15px 0;
 }
 
-.btn {
-    flex: 1;
-    padding: 10px 15px;
-    font-size: 14px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.btn-participate {
-    background-color: #34c759;
+.btn-cancel-participation {
+    background-color: lightcoral;
     color: white;
-}
-
-.btn-participate:hover {
-    background-color: #28a745;
-    transform: scale(1.05);
 }
 
 .btn-message {
-    background-color: #007BFF;
+    background-color: #3c4798;
     color: white;
 }
 
-.btn-message:hover {
-    background-color: #0056b3;
-    transform: scale(1.05);
-}
-
-.btn i {
-    margin-right: 8px;
-    font-size: 16px;
-}
-
-/* Actions sociales */
 .social-actions {
     display: none;
     /*
@@ -351,7 +412,6 @@ h1 {
     color: #ff9800;
 }
 
-/* Style de l'arrière-plan du popup */
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -365,7 +425,6 @@ h1 {
     z-index: 1000;
 }
 
-/* Style du popup */
 .popup {
     background: white;
     padding: 20px;
@@ -382,7 +441,8 @@ h1 {
     border-radius: 5px;
 }
 
-.popup-buttons button {
+.popup-buttons .v-btn {
+    width: 100%;
     padding: 10px 20px;
     margin: 5px;
     border: none;
@@ -390,13 +450,8 @@ h1 {
     cursor: pointer;
 }
 
-.participate {
-    background-color: #a8df65;
-    color: white;
-}
-
-.cancel {
-    background-color: #e57373;
+.popup-buttons .v-btn:last-child {
+    background-color: lightcoral;
     color: white;
 }
 
@@ -413,4 +468,5 @@ h1 {
 .mdi-heart {
     color: red;
 }
+
 </style>

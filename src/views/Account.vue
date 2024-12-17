@@ -65,7 +65,7 @@
                 >{{ interest }}</v-chip>
             </div>
         </div>
-        <v-card v-if="itsMe" class="mt-10" variant="outlined">
+        <v-card v-if="itsMe" class="mt-5" variant="outlined">
             <v-tabs
                 v-model="tab"
                 align-tabs="center"
@@ -222,7 +222,7 @@ export default {
             participations,
             favorites,
             tab,
-            menuVisible, // Ajouter le menu au retour
+            menuVisible,
             toggleMenu,
         };
     },
@@ -389,7 +389,7 @@ h1, h3 {
 }
 
 .scrollable-container {
-    max-height: 48vh;
+    max-height: 39vh;
     overflow-y: auto;
     scrollbar-width: none;
 }
