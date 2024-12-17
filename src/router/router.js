@@ -7,7 +7,8 @@ import Explore from '../views/Explore.vue';
 import AdvancedFilters from "../views/AdvancedFilters.vue";
 import Activity from '../views/Activity.vue';
 import CreateActivity from '../views/CreateActivity.vue';
-import Messages from "../views/Messages.vue";
+import Conversations from "../views/Conversations.vue";
+import Conversation from "../views/Conversation.vue";
 import Account from '../views/Account.vue';
 import AccountSettings from '../views/AccountSettings.vue';
 
@@ -70,9 +71,16 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/messages",
-    name: "Messages",
-    component: Messages,
+    path: "/conversations",
+    name: "Conversations",
+    component: Conversations,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/conversation/:correspondentId",
+    name: "Conversation",
+    component: Conversation,
+    props: true,
     meta: { requiresAuth: true },
   },
   {

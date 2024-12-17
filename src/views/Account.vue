@@ -51,7 +51,7 @@
                 <h3 v-if="user">{{ user.prenom + " " + user.nom }}</h3>
                 <p v-if="user" class="bio">{{ user.bio }}</p>
             </div>
-            <v-btn v-if="!itsMe" color="#3c4798">
+            <v-btn v-if="!itsMe" @click="$router.push(`/conversation/${id}`)" color="#3c4798">
                 Envoyer un message
             </v-btn>
         </div>

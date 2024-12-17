@@ -39,7 +39,7 @@ export default {
             this.$router.push('/create/activity');
         },
         navigateToMessages() {
-            this.$router.push('/messages');
+            this.$router.push('/conversations');
         },
         navigateToProfile() {
             this.$router.push(`/profile/${this.store.userId}`);

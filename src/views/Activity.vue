@@ -23,15 +23,27 @@
             <p v-if="activity" class="event-description">{{ activity.description }}</p>
 
             <div class="event-buttons">
-                <v-btn color="#3c4798" v-if="!isRegistered" @click="showPopupParticipate = true">
-                    <v-icon left icon="mdi-note-edit"></v-icon>
+                <v-btn 
+                    v-if="!isRegistered"
+                    color="#3c4798"
+                    prepend-icon="mdi-note-edit"
+                    @click="showPopupParticipate = true"
+                >
                     Je m'inscris
                 </v-btn>
-                <v-btn v-else class="btn-cancel-participation" @click="showPopupCancelParticipation = true">
+                <v-btn 
+                    v-else 
+                    class="lightcoral-btn"
+                    @click="showPopupCancelParticipation = true"
+                >
                     Annuler mon inscription
                 </v-btn>
-                <v-btn v-if="owner" class="btn-message">
-                    <v-icon left icon="mdi-email"></v-icon>
+                <v-btn 
+                    v-if="owner" 
+                    class="btn-message"
+                    prepend-icon="mdi-email"
+                    @click="$router.push(`/conversation/${owner._id}`)"
+                >
                     Ecrire à {{ owner.prenom }}
                 </v-btn>
             </div>
@@ -60,7 +72,7 @@
             <h2>Souhaitez-vous participer à "{{ activity.title }}" ?</h2>
             <div class="popup-buttons">
                 <v-btn color="#3c4798" @click="handleParticipate">Je participe</v-btn>
-                <v-btn color="lightcoral" @click="handleCancel">J’ai changé d’avis</v-btn>
+                <v-btn class="lightcoral-btn" @click="handleCancel">J’ai changé d’avis</v-btn>
             </div>
         </div>
     </div>
@@ -70,8 +82,8 @@
             <img :src="srcImage" alt="Illustration" class="popup-image" />
             <h2>Souhaitez-vous vous désinscrire de "{{ activity.title }}" ?</h2>
             <div class="popup-buttons">
-                <v-btn color="#3c4798" @click="handleCancelParticipation">Je me désinscris</v-btn>
-                <v-btn color="lightcoral" @click="handleCancel">J’ai changé d’avis</v-btn>
+                <v-btn class="lightcoral-btn" @click="handleCancelParticipation">Je me désinscris</v-btn>
+                <v-btn color="#3c4798" @click="handleCancel">J’ai changé d’avis</v-btn>
             </div>
         </div>
     </div>
@@ -79,7 +91,7 @@
 
 <script>
 import { useStore } from '../stores/store';
-import { ref, onMounted } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -119,7 +131,7 @@ export default {
             return imageSrc;
         };
 
-        onMounted(async () => {
+        onBeforeMount(async () => {
             try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/${props.id}`);
                 if (response.status === 200) {
@@ -360,11 +372,6 @@ h1 + p div {
     margin: 15px 0;
 }
 
-.btn-cancel-participation {
-    background-color: lightcoral;
-    color: white;
-}
-
 .btn-message {
     background-color: #3c4798;
     color: white;
@@ -450,7 +457,7 @@ h1 + p div {
     cursor: pointer;
 }
 
-.popup-buttons .v-btn:last-child {
+.lightcoral-btn {
     background-color: lightcoral;
     color: white;
 }
