@@ -89,7 +89,7 @@ export default {
                 if (response.status === 200) {
                     correspondent.value = response.data;
 					conversationId.value = createConversationId(store.userId, correspondent.value._id);
-					socket.value = io('http://localhost:5002');
+					socket.value = io(import.meta.env.APP_SOCKET_URL);
 					socket.value.emit('joinConversation', conversationId.value);
 					socket.value.on('newMessage', (message) => {
 						const flattenedMessage = {
