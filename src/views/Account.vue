@@ -170,6 +170,9 @@ export default {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/user/${userId}`);
                 if (response.status === 200) {
                     activities.value = response.data;
+                    activities.value.forEach(activity => {
+                        store.updateDistanceCache(activity._id, 0, 0);
+                    });
                 } else {
                     console.log("Erreur lors de la récupération des activités animées par l'utilisateur");
                 }

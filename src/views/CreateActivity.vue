@@ -325,8 +325,9 @@ export default {
             } else {
 
                 try {
-                    const response = await axios.get(`https://maps.google.com/maps/api/geocode/json?address=${encodeURIComponent(this.form.address)}&key=${import.meta.env.APP_GOOGLE_MAPS_API_KEY}`);
-                    
+                    // const response = await axios.get(`https://maps.google.com/maps/api/geocode/json?address=${encodeURIComponent(this.form.address)}&key=${import.meta.env.APP_GOOGLE_MAPS_API_KEY}`);
+                    const response = await axios.get(`${import.meta.env.APP_BACK_URL}/geocode?address=${this.form.address}`);
+
                     if (response.data.results[0].geometry.location) {
                         
                         const coordinates = { 
