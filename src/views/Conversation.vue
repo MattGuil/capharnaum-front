@@ -8,7 +8,7 @@
 			</div>
 		</div>
 
-		<div class="messages flex-grow-1">
+		<div class="messages">
 			<v-card
 				v-for="message in conversation" 
 				:key="message.id" 
@@ -18,6 +18,7 @@
 				<div class="message-content">{{ message.content }}</div>
 				<div class="message-time">{{ new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }}</div>
 			</v-card>
+			<span ref="bottomElement"></span>
 		</div>
 
 		<div class="message-input-bar">
@@ -41,7 +42,7 @@
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useStore } from '../stores/store';
-import { reactive, ref, onBeforeMount, watch } from 'vue';
+import { reactive, ref, onBeforeMount, onMounted, watch} from 'vue';
 
 export default {
 	name: "Conversation",
@@ -57,10 +58,18 @@ export default {
 		const conversation = ref([]);
 		const correspondent = ref(null);
 
+		const bottomElement = ref(null);
+
 		const createConversationId = (id1, id2) => {
 			const sortedIds = [id1, id2].sort();
 			return sortedIds.join('-');
 		}
+
+		const scrollToBottom = () => {
+			if (bottomElement.value) {
+				bottomElement.value.scrollIntoView({ behavior: 'smooth' });
+			}
+		};
 
 		onBeforeMount(async () => {
 
@@ -92,6 +101,7 @@ export default {
 							...conversation.value,
 							reactiveMessage
 						];
+						scrollToBottom();
 					});
                 } else {
                     console.log("Erreur lors de la récupération de l'identité du correspondant");
@@ -101,12 +111,20 @@ export default {
             }
 		})
 
+		onMounted(() => {
+			setTimeout(() => {
+				scrollToBottom();
+			}, 500);
+		})
+
 		return {
 			conversationId,
 			socket,
 			store,
 			conversation,
 			correspondent,
+			bottomElement,
+			scrollToBottom
 		}
 	},
 	methods: {
