@@ -38,9 +38,10 @@
 </template>
 
 <script>
+import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useStore } from '../stores/store';
-import { ref, onBeforeMount } from 'vue';
+import { reactive, ref, onBeforeMount, watch } from 'vue';
 
 export default {
 	name: "Conversation",
@@ -50,11 +51,19 @@ export default {
         }
     },
 	setup(props) {
+		const conversationId = ref('');
+		const socket = ref(null); 
 		const store = useStore();
 		const conversation = ref([]);
 		const correspondent = ref(null);
 
+		const createConversationId = (id1, id2) => {
+			const sortedIds = [id1, id2].sort();
+			return sortedIds.join('-');
+		}
+
 		onBeforeMount(async () => {
+
 			try {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/message/${store.userId}/${props.correspondentId}`);
                 if (response.status === 200) {
@@ -70,21 +79,30 @@ export default {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/user/${props.correspondentId}`);
                 if (response.status === 200) {
                     correspondent.value = response.data;
+					conversationId.value = createConversationId(store.userId, correspondent.value._id);
+					socket.value = io('http://localhost:5002');
+					socket.value.emit('joinConversation', conversationId.value);
+					socket.value.on('newMessage', (message) => {
+						const reactiveMessage = reactive(message);
+						conversation.value = [
+							...conversation.value,
+							reactiveMessage
+						];
+					});
                 } else {
                     console.log("Erreur lors de la récupération de l'identité du correspondant");
                 }
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
             }
-
-			console.log(conversation.value);
-			console.log(correspondent.value);
 		})
 
 		return {
+			conversationId,
+			socket,
 			store,
 			conversation,
-			correspondent
+			correspondent,
 		}
 	},
 	methods: {
@@ -100,15 +118,30 @@ export default {
 		async sendMessage() {
 			if (this.newMessage.trim() !== "") {
 				
+				/*
 				await axios.post(`${import.meta.env.APP_API_URL}/message/send`, {
 					from: this.store.userId,
 					to: this.correspondentId,
 					content: this.newMessage
 				});
+				*/
+
+				this.socket.emit('sendMessage', {
+					from: this.store.userId,
+					to: this.correspondentId,
+					content: this.newMessage,
+					conversationId: this.conversationId
+				});
+
 				this.newMessage = "";
 			}
 		},
 	},
+	beforeDestroy() {
+		if (this.socket) {
+			this.socket.disconnect();
+		}
+	}
 };
 
 </script>
@@ -152,10 +185,10 @@ export default {
 }
 
 .messages {
+	height: 72vh;
 	overflow-y: auto;
 	padding: 0 15px;
 	padding-bottom: 10px;
-	height: 72vh;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
