@@ -27,7 +27,7 @@ import axios from 'axios';
 const routes = [
   {
     path: "/",
-    redirect: "/home"
+    redirect: "/login"
   },
   {
     path: "/login",

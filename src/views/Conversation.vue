@@ -8,7 +8,7 @@
 			</div>
 		</div>
 
-		<div class="messages">
+		<div class="messages flex-grow-1">
 			<v-card
 				v-for="message in conversation" 
 				:key="message.id" 
@@ -83,7 +83,11 @@ export default {
 					socket.value = io('http://localhost:5002');
 					socket.value.emit('joinConversation', conversationId.value);
 					socket.value.on('newMessage', (message) => {
-						const reactiveMessage = reactive(message);
+						const flattenedMessage = {
+							...message,
+							...message.message
+						};
+						const reactiveMessage = reactive(flattenedMessage);
 						conversation.value = [
 							...conversation.value,
 							reactiveMessage
@@ -156,6 +160,9 @@ export default {
 }
 
 .message-detail-header {
+	z-index: 10;
+	position: fixed;
+	width: 100%;
 	height: 10vh;
 	padding: 15px;
 	background-color: white;
@@ -185,10 +192,8 @@ export default {
 }
 
 .messages {
-	height: 72vh;
 	overflow-y: auto;
-	padding: 0 15px;
-	padding-bottom: 10px;
+	padding: 12vh 15px 10vh 15px;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
