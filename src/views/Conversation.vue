@@ -101,7 +101,9 @@ export default {
 							...conversation.value,
 							reactiveMessage
 						];
-						scrollToBottom();
+						setTimeout(() => {
+							scrollToBottom();
+						}, 500);
 					});
                 } else {
                     console.log("Erreur lors de la récupération de l'identité du correspondant");
@@ -210,6 +212,7 @@ export default {
 }
 
 .messages {
+	min-height: 92vh;
 	overflow-y: auto;
 	padding: 12vh 15px 10vh 15px;
 	display: flex;
