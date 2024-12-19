@@ -5,13 +5,13 @@
         <i @click="updateFavorites()" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
 
         <h1 v-if="activity">{{ activity.title }}</h1>
-        <p v-if="owner">
-            organisé par 
-            <div @click="navigateToOwnerProfile()">
-                <img class="owner-avatar" src="../assets/user.png" alt="Photo de profil"> 
-                {{ owner.prenom }}
+        <div v-if="owner">
+            <p>organisé par </p>
+            <div class="owner-profile" @click="navigateToOwnerProfile()">
+                <img src="../assets/user.png" alt="Photo de profil"> 
+                <p>{{ owner.prenom }}</p>
             </div>
-        </p>
+        </div>
         <h2 v-if="activity" class="event-title">{{ activity.placeName }}</h2>
         
         <div class="event-details">
@@ -322,17 +322,23 @@ h1 {
     margin-bottom: 0;
 }
 
-h1 + p {
+h1 + div {
     display: flex;
 }
 
-h1 + p div {
+.owner-profile {
+    display: flex;
     cursor: pointer;
     height: 30px;
 }
 
-.owner-avatar {
+.owner-profile img {
     height: 80%;
+    margin-left: 5px;
+}
+
+.owner-profile p {
+    margin: 0;
     margin-left: 5px;
 }
 
