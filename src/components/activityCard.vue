@@ -1,13 +1,12 @@
 <template>
     <v-card @click="clickCard">
+        <h2 v-if="showDistance" class="distance">à <em>{{ store.getDistanceFor(activity._id).distance }}</em> de toi</h2>
         <i @click="updateFavorites($event)" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
         <img :src="srcImage" alt="">
-        <div>
-
-        </div>
+        
         <div class="infos">
-            <h1>{{ activity.title + " (" + activity.price + "€)" }}</h1>
-            <h2>{{ activity.placeName }}<br>({{ store.getDistanceFor(activity._id).distance }})</h2>
+            <h1>{{ activity.title + " (" + (activity.price > 0 ? activity.price + "€" : "gratuit" ) + ")" }}</h1>
+            <h2>{{ activity.placeName }}</h2>
             <h3>{{ activity.startTime + " - " + activity.endTime }}</h3>
         </div>
     </v-card>
@@ -23,7 +22,10 @@ export default {
     props: {
         activity: {
             required: true
-        }
+        },
+        showDistance: {
+            required: true
+        },
     },
     setup(props) {
 
@@ -145,6 +147,18 @@ h2 {
 
 h3 {
     font-size: .5rem;
+}
+
+.distance {
+    z-index: 100;
+    position: absolute;
+    top: 20px;
+    left: 0;
+    background-color: #3c4798;
+    color: white;
+    padding: 5px;
+    border-radius: 0 5px 5px 0;
+    box-shadow: 5px solid black;
 }
 
 .mdi {
