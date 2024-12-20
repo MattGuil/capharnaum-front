@@ -22,7 +22,7 @@
 
             <p v-if="activity" class="event-description">{{ activity.description }}</p>
 
-            <div class="event-buttons">
+            <div v-if="owner && owner._id != store.userId" class="event-buttons">
                 <v-btn 
                     v-if="!isRegistered"
                     color="#3c4798"
@@ -45,6 +45,16 @@
                     @click="$router.push(`/conversation/${owner._id}`)"
                 >
                     Ecrire à {{ owner.prenom }}
+                </v-btn>
+            </div>
+            <div v-else class="event-buttons">
+                <p>Tu es l'organisateur.trice de cet évènement</p>
+                <v-btn
+                    color="#3c4798"
+                    prepend-icon="mdi-head"
+                    @click="$router.push(`/profile/${store.userId}`)"
+                >
+                    Consulter mes activités
                 </v-btn>
             </div>
 
@@ -376,6 +386,11 @@ h1 + div {
     flex-direction: column;
     gap: 10px;
     margin: 15px 0;
+    text-align: center;
+}
+
+.event-buttons p {
+    margin: 0;
 }
 
 .btn-message {
