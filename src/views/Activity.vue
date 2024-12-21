@@ -22,9 +22,17 @@
 
             <p v-if="activity" class="event-description">{{ activity.description }}</p>
 
+
             <div v-if="owner && owner._id != store.userId" class="event-buttons">
+                
+                <p v-if="activity" class="event-description">
+                    <strong v-if="!isRegistered && activity.maxParticipants - activity.nbParticipants > 0">{{ remainingPlaces }} place(s) restante(s)</strong>
+                    <strong v-else-if="!isRegistered && activity.maxParticipants - activity.nbParticipants == 0">Cet évènement est complet</strong>
+                </p>
+                
                 <v-btn 
                     v-if="!isRegistered"
+                    :disabled="!(activity.maxParticipants - activity.nbParticipants > 0)"
                     color="#3c4798"
                     prepend-icon="mdi-note-edit"
                     @click="showPopupParticipate = true"
@@ -121,6 +129,7 @@ export default {
         const srcImage = ref('');
         const isFav = ref(false);
         const isRegistered = ref(false);
+        const remainingPlaces = ref(null);
 
         const showPopupParticipate = ref(false);
         const showPopupCancelParticipation = ref(false);
@@ -146,6 +155,7 @@ export default {
                 const response = await axios.get(`${import.meta.env.APP_API_URL}/activity/${props.id}`);
                 if (response.status === 200) {
                     activity.value = response.data;
+                    remainingPlaces.value = activity.value.maxParticipants - activity.value.nbParticipants;
                 } else {
                     console.error('Erreur lors de la récupération de l\'activité');
                 }
@@ -206,6 +216,17 @@ export default {
                     isRegistered.value = true;
                     snackbarMessage.value = "Vous êtes inscrit !";
                     snackbarVisible.value = true;
+                    try {
+                        const response = await axios.patch(`${import.meta.env.APP_API_URL}/activity/${activity.value._id}/increment-participants`);
+                        if (response.status === 200) {
+                            console.log("+1 participant");
+                            remainingPlaces.value += 1;
+                        } else {
+                            console.error("Erreur lors de l'ajout d'un participant à l'activité");
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
                 } else {
                     console.error("Erreur lors de l'inscription");
                 }
@@ -222,6 +243,17 @@ export default {
                     isRegistered.value = false;
                     snackbarMessage.value = "Vous êtes désinscrit !";
                     snackbarVisible.value = true;
+                    try {
+                        const response = await axios.patch(`${import.meta.env.APP_API_URL}/activity/${activity.value._id}/decrement-participants`);
+                        if (response.status === 200) {
+                            console.log("-1 participant");
+                            remainingPlaces.value -= 1;
+                        } else {
+                            console.error("Erreur lors du retrait d'un participant de l'activité");
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
                 } else {
                     console.error("Erreur lors de la désinscription");
                 }
@@ -257,6 +289,7 @@ export default {
             srcImage,
             isFav,
             isRegistered,
+            remainingPlaces,
             showPopupParticipate,
             showPopupCancelParticipation,
             snackbarMessage,

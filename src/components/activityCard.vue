@@ -1,7 +1,9 @@
 <template>
-    <v-card @click="clickCard">
-        <h2 v-if="showDistance" class="distance">à <em>{{ store.getDistanceFor(activity._id).distance }}</em> de toi</h2>
+    <v-card v-if="activity" @click="clickCard">
+        <h2 v-if="showDistance && activity.maxParticipants - activity.nbParticipants > 0" class="distance">à <em>{{ store.getDistanceFor(activity._id).distance }}</em> de toi</h2>
+        <h2 v-else-if="showDistance && !(activity.maxParticipants - activity.nbParticipants > 0)" class="complet">COMPLET</h2>
         <i @click="updateFavorites($event)" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
+        
         <img :src="srcImage" alt="">
         
         <div class="infos">
@@ -149,16 +151,23 @@ h3 {
     font-size: .5rem;
 }
 
-.distance {
+h2.distance, h2.complet {
     z-index: 100;
     position: absolute;
     top: 20px;
     left: 0;
-    background-color: #3c4798;
     color: white;
     padding: 5px;
     border-radius: 0 5px 5px 0;
     box-shadow: 5px solid black;
+}
+
+h2.distance {
+    background-color: #3c4798;
+}
+
+h2.complet {
+    background-color: #D04E4E;
 }
 
 .mdi {

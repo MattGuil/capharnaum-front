@@ -35,7 +35,8 @@ export default {
         };
 
         const addMarker = (activity) => {
-            const marker = new Marker({ color: "#3c4798" })
+            const color = (activity.maxParticipants - activity.nbParticipants > 0) ? "#3c4798" : "#d04e4e";
+            const marker = new Marker({ color })
                 .setLngLat([activity.coordinates.lng, activity.coordinates.lat])
                 .addTo(map.value);
 

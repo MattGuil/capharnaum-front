@@ -109,7 +109,7 @@
                                 v-for="participation in participations" 
                                 :key="participation.id" 
                                 :activity="participation.activity"
-                                :showDistance="true"
+                                :showDistance="false"
                             />
                         </div>
                     </v-tabs-window-item>
