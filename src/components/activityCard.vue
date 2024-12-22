@@ -3,7 +3,7 @@
         <h2 v-if="isDistanceShown && activity.maxParticipants - activity.nbParticipants > 0" class="distance">à <em>{{ store.getDistanceFor(activity._id).distance }}</em> de toi</h2>
         <h2 v-else-if="isDistanceShown && !(activity.maxParticipants - activity.nbParticipants > 0)" class="complet">COMPLET</h2>
         <i v-if="!isEditable" @click="updateFavorites($event)" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
-        <i v-else @click="updateActivity($event)" class="mdi mdi-pencil"></i>
+        <i v-else @click="navigateToManageActivity($event)" class="mdi mdi-pencil"></i>
         
         <img :src="srcImage" alt="">
         
@@ -107,7 +107,7 @@ export default {
                 console.error("Erreur de connexion ou autre :", error);
             }
         },
-        updateActivity(event) {
+        navigateToManageActivity(event) {
             
             event.stopPropagation();
             
