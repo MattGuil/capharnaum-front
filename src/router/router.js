@@ -13,15 +13,6 @@ import Conversation from "../views/Conversation.vue";
 import Account from '../views/Account.vue';
 import AccountSettings from '../views/AccountSettings.vue';
 
-/*
-import AccountFavorites from '../views/AccountFavorites.vue';
-import AccountActivities from '../views/AccountActivities.vue';
-import AccountProposals from '../views/AccountProposals.vue';
-import ManageProposal from '../views/ManageProposal.vue';
-import Participate from '../views/Participate.vue';
-import CreateProposal from '../views/CreateProposal.vue';
-*/
-
 import axios from 'axios';
 
 const routes = [
@@ -98,60 +89,11 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/account/settings',
+    path: '/profile/settings',
     name: 'AccountSettings',
     component: AccountSettings,
     meta: { requiresAuth: true },
-  },
-  /*
-  {
-    path: '/profile/favorites',
-    name: 'AccountFavorites',
-    component: AccountFavorites,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/profile/activities',
-    name: 'AccountActivities',
-    component: AccountActivities,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/account/my-activites/manage',
-    name: 'ManageActivity',
-    component: ManageActivity,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/account/my-proposals',
-    name: 'AccountProposals',
-    component: AccountProposals,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/account/my-proposals/manage',
-    name: 'ManageProposal',
-    component: ManageProposal,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/participate',
-    name: 'Participate',
-    component: Participate,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/create',
-    name: 'Create',
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/create/proposal',
-    name: 'CreateProposal',
-    component: CreateProposal,
-    meta: { requiresAuth: true },
-  },
-  */
+  }
 ];
 
 const router = createRouter({
