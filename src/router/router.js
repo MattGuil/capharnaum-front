@@ -7,6 +7,7 @@ import Explore from '../views/Explore.vue';
 import AdvancedFilters from "../views/AdvancedFilters.vue";
 import Activity from '../views/Activity.vue';
 import CreateActivity from '../views/CreateActivity.vue';
+import ManageActivity from '../views/ManageActivity.vue';
 import Conversations from "../views/Conversations.vue";
 import Conversation from "../views/Conversation.vue";
 import Account from '../views/Account.vue';
@@ -16,7 +17,6 @@ import AccountSettings from '../views/AccountSettings.vue';
 import AccountFavorites from '../views/AccountFavorites.vue';
 import AccountActivities from '../views/AccountActivities.vue';
 import AccountProposals from '../views/AccountProposals.vue';
-import ManageActivity from '../views/ManageActivity.vue';
 import ManageProposal from '../views/ManageProposal.vue';
 import Participate from '../views/Participate.vue';
 import CreateProposal from '../views/CreateProposal.vue';
@@ -68,6 +68,13 @@ const routes = [
     path: '/create/activity',
     name: 'CreateActivity',
     component: CreateActivity,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/manage/activity/:id',
+    name: 'ManageActivity',
+    component: ManageActivity,
+    props: true,
     meta: { requiresAuth: true },
   },
   {

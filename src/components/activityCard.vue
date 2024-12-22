@@ -1,8 +1,9 @@
 <template>
     <v-card v-if="activity" @click="clickCard">
-        <h2 v-if="showDistance && activity.maxParticipants - activity.nbParticipants > 0" class="distance">à <em>{{ store.getDistanceFor(activity._id).distance }}</em> de toi</h2>
-        <h2 v-else-if="showDistance && !(activity.maxParticipants - activity.nbParticipants > 0)" class="complet">COMPLET</h2>
-        <i @click="updateFavorites($event)" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
+        <h2 v-if="isDistanceShown && activity.maxParticipants - activity.nbParticipants > 0" class="distance">à <em>{{ store.getDistanceFor(activity._id).distance }}</em> de toi</h2>
+        <h2 v-else-if="isDistanceShown && !(activity.maxParticipants - activity.nbParticipants > 0)" class="complet">COMPLET</h2>
+        <i v-if="!isEditable" @click="updateFavorites($event)" :class="'mdi' + ' ' + (isFav ? 'mdi-heart' : 'mdi-heart-outline')"></i>
+        <i v-else @click="updateActivity($event)" class="mdi mdi-pencil"></i>
         
         <img :src="srcImage" alt="">
         
@@ -25,9 +26,13 @@ export default {
         activity: {
             required: true
         },
-        showDistance: {
+        isDistanceShown: {
             required: true
         },
+        isEditable: {
+            required: false,
+            default: false
+        }
     },
     setup(props) {
 
@@ -101,6 +106,12 @@ export default {
             } catch (error) {
                 console.error("Erreur de connexion ou autre :", error);
             }
+        },
+        updateActivity(event) {
+            
+            event.stopPropagation();
+            
+            this.$router.push(`/manage/activity/${this.activity._id}`);
         }
     }
 };

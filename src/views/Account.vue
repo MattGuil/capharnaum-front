@@ -97,9 +97,10 @@
                         <div class="activity-cards-container">
                             <activityCard 
                                 v-for="activity in activities" 
-                                :key="activity.id" 
+                                :key="activity.id"
                                 :activity="activity"
-                                :showDistance="false"
+                                :isDistanceShown="false"
+                                :isEditable="true"
                             />
                         </div>
                     </v-tabs-window-item>
@@ -109,7 +110,7 @@
                                 v-for="participation in participations" 
                                 :key="participation.id" 
                                 :activity="participation.activity"
-                                :showDistance="false"
+                                :isDistanceShown="false"
                             />
                         </div>
                     </v-tabs-window-item>
@@ -119,7 +120,7 @@
                                 v-for="favorite in favorites" 
                                 :key="favorite.id" 
                                 :activity="favorite.activity"
-                                :showDistance="true"
+                                :isDistanceShown="true"
                             />
                         </div>
                     </v-tabs-window-item>

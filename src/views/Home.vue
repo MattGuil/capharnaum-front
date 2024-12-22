@@ -24,7 +24,7 @@
                     <activityCard
                         :key="activity.id" 
                         :activity="activity"
-                        :showDistance="true"
+                        :isDistanceShown="true"
                     />
                 </v-carousel-item>
             </v-carousel>
