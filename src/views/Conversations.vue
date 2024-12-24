@@ -5,12 +5,8 @@
 		</header>
 		<div v-if="conversations && conversations.length > 0" class="message-list-container">
 			<div class="message-list">
-				<div 
-					v-for="conversation in conversations"
-					:key="conversation.id"
-					class="message-item"
-					@click="$router.push(`/conversation/${conversation.conversationPartner._id}`)"
-				>
+				<div v-for="conversation in conversations" :key="conversation.id" class="message-item"
+					@click="$router.push(`/conversation/${conversation.conversationPartner._id}`)">
 					<img src="../assets/user.png" alt="Profil" class="profile-pic" />
 					<div class="message-content">
 						<h2>{{ conversation.conversationPartner.prenom + " " + conversation.conversationPartner.nom }}</h2>
@@ -36,15 +32,15 @@ export default {
 
 		onBeforeMount(async () => {
 			try {
-                const response = await axios.get(`${import.meta.env.APP_API_URL}/message/${store.userId}`);
-                if (response.status === 200) {
-                    conversations.value = response.data;
-                } else {
-                    console.log("Erreur lors de la récupération des conversations");
-                }
-            } catch (error) {
-                console.error("Erreur de connexion ou autre :", error);
-            }
+				const response = await axios.get(`${import.meta.env.APP_API_URL}/message/${store.userId}`);
+				if (response.status === 200) {
+					conversations.value = response.data;
+				} else {
+					console.log("Erreur lors de la récupération des conversations");
+				}
+			} catch (error) {
+				console.error("Erreur de connexion ou autre :", error);
+			}
 
 			console.log(conversations.value);
 		})
@@ -77,33 +73,51 @@ export default {
 }
 
 .message-list {
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
+
 .message-item {
-  display: flex;
-  align-items: center;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
+	max-height: 80px;
+	width: 100%; 
+	display: flex;
+	align-items: center;
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	padding: 10px;
+	margin-bottom: 10px;
+	cursor: pointer;
 }
+
 .profile-pic {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 15px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	margin-right: 15px;
 }
-.message-content h2 {
-  margin: 0;
-  font-size: 18px;
-  color: #333;
+
+.message-content {
+	flex: 1;
+    overflow: hidden;
 }
+
+.message-content h2,
 .message-content p {
-  margin: 0;
-  font-size: 14px;
-  color: #666;
+	overflow: hidden;
+    white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.message-content h2 {
+	margin: 0;
+	font-size: 18px;
+	color: #333;
+}
+
+.message-content p {
+	margin: 0;
+	font-size: 14px;
+	color: #666;
 }
 
 </style>
