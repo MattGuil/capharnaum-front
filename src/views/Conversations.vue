@@ -3,7 +3,7 @@
 		<header class="header">
 			<h1>Messagerie</h1>
 		</header>
-		<div class="message-list-container">
+		<div v-if="conversations && conversations.length > 0" class="message-list-container">
 			<div class="message-list">
 				<div 
 					v-for="conversation in conversations"
@@ -19,6 +19,7 @@
 				</div>
 			</div>
 		</div>
+		<p v-else>Ta messagerie est vide pour le moment.</p>
 	</div>
 </template>
 
@@ -60,9 +61,9 @@ export default {
 <style scoped>
 
 .messages-page {
-	height: 92vh;
-	padding: 20px;
 	background: rgba(255, 255, 255, .5);
+	padding: 20px;
+	min-height: 92vh;
 }
 
 .header {

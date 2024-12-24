@@ -84,6 +84,9 @@
 			<v-btn type="submit" color="#3c4798" class="mt-4" block>
 				Modifier l'activité
 			</v-btn>
+			<v-btn color="gray" class="mt-4 cancel-btn" block @click="navigateToProfile()">
+				Annuler
+			</v-btn>
 		</v-form>
 
 		<v-snackbar v-model="errorSnackbarVisible" :timeout="3000" location="bottom center" color="red">
@@ -298,6 +301,9 @@ export default {
 
 			return true;
 		},
+		navigateToProfile() {
+			this.$router.push(`/profile/${this.store.userId}`);
+		},
 		async updateActivity() {
 
 			const isValid = this.validateForm();
@@ -414,7 +420,7 @@ label {
 	gap: 10px;
 }
 
-.v-btn[type="submit"] {
+.v-btn.cancel-btn {
 	margin-bottom: 8vh;
 }
 

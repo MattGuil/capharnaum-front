@@ -162,12 +162,22 @@ export default {
             console.log("ACTIVITIES LOADED.");
         };
 
+        const getRandomActivities = (activities, num) => {
+            const shuffled = activities.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, num);
+        };
+
         const retrieveActivitiesByUserInterest = async () => {
             user.value.interests.forEach(async (interest) => {
                 try {
                     const response = await axios.post(`${import.meta.env.APP_API_URL}/activity/filter/${store.userId}`, { disciplines: [interest] });
                     if (response.status === 200) {
-                        activitiesByUserInterest.value[interest] = response.data;
+                        const allActivities = response.data;
+                        if (allActivities.length > 3) {
+                            activitiesByUserInterest.value[interest] = getRandomActivities(allActivities, 3);
+                        } else {
+                            activitiesByUserInterest.value[interest] = allActivities;
+                        }
                     } else {
                         console.error("Erreur lors de la récupération des activités");
                         activitiesByUserInterest.value[interest] = [];
@@ -232,7 +242,7 @@ export default {
 .interest-ad {
     position: relative;
     width: 100%;
-    margin: 10px 0;
+    margin: 25px 0;
 }
 
 h3 {
@@ -245,7 +255,7 @@ h3 {
     color: white;
     padding: 10px;
     border-radius: 10px;
-    transform: rotate(10deg);
+    transform: rotate(4deg);
 }
 
 </style>

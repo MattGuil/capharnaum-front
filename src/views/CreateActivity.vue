@@ -158,6 +158,9 @@
             <v-btn type="submit" color="#3c4798" class="mt-4" block>
                 Créer l'activité
             </v-btn>
+			<v-btn color="gray" class="mt-4 cancel-btn" block @click="navigateToHome()">
+				Annuler
+			</v-btn>
         </v-form>
 
         <v-snackbar v-model="errorSnackbarVisible" :timeout="3000" location="bottom center" color="red">
@@ -294,6 +297,9 @@ export default {
         };
     },
     methods: {
+        navigateToHome() {
+            this.$router.push('/home');
+        },
         validateForm() {
             if (!this.form.title || 
                 !this.form.discipline || 
