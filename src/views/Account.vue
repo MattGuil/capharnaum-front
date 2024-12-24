@@ -81,7 +81,7 @@
                 <v-tab value="participations" class="tab-item">
                     <v-icon icon="mdi-note-edit"></v-icon>
                     <div class="tab-text">
-                        Participations ({{ participations ? participations.length : 0 }})
+                        Inscriptions ({{ participations ? participations.length : 0 }})
                     </div>
                 </v-tab>
                 <v-tab value="favorites" class="tab-item">
